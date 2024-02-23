@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiendaJS</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <img class="img-logo" src="/resources/images/logoTienda.png">
+            <h1>TiendaJS</h1>
+        </div>
+        <div class="links-capsule">
+            <ul class="links">
+                <li><a>Clientes</a></li>
+                <li><a>Productos</a></li>
+                <li><a>Realizar Venta</a></li>
+                <li><a>Historial de Ventas</a></li>
+                <li><a>Inventario</a></li>
+            </ul>
+        </div>
+    </div>  
+
+    <div class="content">
+        <!--Diferentes formularios-->
+        <div class="centered-box" id="clientesForm">
+            <h2>Registro de Clientes</h2>
+            <form class="form-cliente"> 
+                <div class="box">
+                    <label>Identificación</label>
+                    <img src="/resources/images/logoId.png">
+                    <input type="number" placeholder="Identificación">
+                </div>
+                <div class="box">
+                    <label>Nombre</label>
+                    <img src="/resources/images/logoNombre.png">
+                    <input type="text" placeholder="Nombre">
+                </div>
+                <div class="box">
+                    <label>Dirección</label>
+                    <img src="/resources/images/logoDireccion.png">
+                    <input type="text" placeholder="Número">
+                </div>
+                <button type="submit" id="subir"">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/controller/IndexController.js"></script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+body {
+    margin: 0;
+    background: #ffffff;
+    font-family: 'Quicksand', sans-serif;
+}
+
+/*Edicion del header*/
+
+.header {
+    background-color: #ffbf47;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 90px;
+}
+
+.logo {
+    margin-left: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.logo h1 {
+    margin-top: 50px;
+    font-size: 45px;
+    color: #fbfef9;
+}
+
+.img-logo {
+    height: auto;
+    width: 80px;
+}
+
+.links-capsule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 60px;
+}
+
+.links {
+    list-style: none;
+    text-decoration: none;
+    gap: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fbfef9;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+@keyframes cambiaColor {
+    0% { color: #ffbf47; } /* Color del enlace al inicio de la animación */
+    100% { color: #070707; } /* Color del enlace al final de la animación */
+}
+
+.links a:hover {
+    animation: cambiaColor 0.3s ease;
+}
+
+/*Edicion del contenido de la interfaz*/
+
+.content {
+    background-image: url("/resources/images/fondoPatron.png"); 
+    background-position: center; 
+    min-height: 525px; 
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}    
+
+.centered-box {
+    height: 450px;
+    width: 800px;
+    background-color: #fbfef9;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); 
+    border-radius: 10px; 
+    text-align: center; 
+}
+
+/*Edicion de los diferentes formularios*/
+
+.form-cliente {
+    font-size: 14px;
+    font-weight: bold;
+    color: #070707;
+}
+
+.form-cliente input {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    outline: 1px solid #FEBF00;
+    border: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #e2e2e2;
+    outline-offset: 3px;
+    padding: 3px 1rem;
+    transition: 0.25s;
+}
+
+.form-cliente input:focus {
+    outline-offset: 5px;
+    background-color: #fff  
+}
+
+.form-cliente img {
+    height: auto;
+    width: 50px;
+}
+
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+
+
