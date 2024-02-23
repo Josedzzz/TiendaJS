@@ -20,7 +20,6 @@ const mostrarFormulario = (formId) => {
     //Muestra el formulario
     const form = document.getElementById(formId);
     form.style.display = "block";
-
     //Oculta el resto de formularios
     const otherForms = document.querySelectorAll(".form-container:not(#" + formId + ")");
     for (const otherForm of otherForms) {
