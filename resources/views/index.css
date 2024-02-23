@@ -52,13 +52,18 @@ body {
     font-size: 18px;
 }
 
+.links a {
+    text-decoration: none;
+    color: inherit;
+}
+
 @keyframes cambiaColor {
     0% { color: #ffbf47; } /* Color del enlace al inicio de la animación */
     100% { color: #070707; } /* Color del enlace al final de la animación */
 }
 
 .links a:hover {
-    animation: cambiaColor 0.3s ease;
+    animation: cambiaColor 0.5s ease;
 }
 
 /*Edicion del contenido de la interfaz*/
