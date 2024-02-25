@@ -3,11 +3,11 @@ class CarritoCompras {
     /**
      * Constructor de la clase carritoCompras
      * @param {*} cliente 
-     * @param {*} listaProductos 
+     * @param {*} hashmapProductos 
      */
-    constructor(cliente, listaProductos) {
+    constructor(cliente, hashmapProductos) {
         this.cliente = cliente;
-        this.listaProductos = listaProductos;
+        this.hashmapProductos = new Map();
     }
 
 }
