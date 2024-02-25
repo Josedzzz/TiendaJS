@@ -1,4 +1,4 @@
-class Tienda {
+export default class Tienda {
 
     //El histórico de ventas queda pendiente. Toca decidir si cambiamos la lista de ventas por el historico de ventas o si dejamos ambas. Robinson recomendó usar un LinkedList para el histórico de ventas.
     //Por otro lado, hay un atributo Inventario de Productos al cuál no le veo uso útil. No sé si lo dejamos o lo quitamos.
@@ -22,24 +22,61 @@ class Tienda {
         this.listaCarritos = [];
     }
 
+    getClientes() {
+        return this.hashMapClientes;
+    }
+
     //Ejemplo de un metodo para agregar un producto
 
     /**
-     * Agrega un producto al hashMap de productos
-     * @param {*} id 
-     * @param {*} producto 
+     * Test para saber que si se conecto la tienda correctamente
      */
-    agregarProducto(id, producto) {
-        this.productos[id] = producto;
+    test() {
+        alert('hello world');
     }
 
-    /**
-     * Método para dar un carrito de compras a un cliente.
-     * Este método es para dar un carrito de compras a un cliente. No sé si deba manejar en Tienda o en Venta. La idea queda ahí. =)
-     */
-    darCarrito() {
-        //Código para dar un carrito de compras a un cliente.
+    /* Registra un cliente siempre y cuando su id no exista
+    * @param {*} identificacion 
+    * @param {*} nombre 
+    * @param {*} direccion 
+    */
+   registrarCliente(identificacion, nombre, direccion) {
+       //Verifica si la identificacion ya existe
+       if (this.hashMapClientes.hasOwnProperty(identificacion)) {
+           alert("El cliente con identificacion " + identificacion + " ya está registrado")
+       } else {
+           //Si no existe se agrega al hashMap
+           this.hashMapClientes[identificacion] = {nombre, direccion};
+           alert("Cliente registrado con exito")
+           //Imprimo el hashMap de clientes para ver si si estan xd
+           this.imprimirClientes();
+       }
+   }
 
-    }
+   /**
+    * Elimina un cliente del hashMap de clientes dado su id
+    * @param {*} idCliente 
+    */
+   eliminarCliente(idCliente) {
+       // Verifica si el cliente existe
+       if (this.hashMapClientes.hasOwnProperty(idCliente)) {
+           delete this.hashMapClientes[idCliente];
+           alert(`Cliente con identificación ${idCliente} eliminado.`);
+       } else {
+           alert(`El cliente con identificación ${idCliente} no existe.`);
+       }
+   }
+
+   /**
+    * Imprime el hashMap de clientes
+    */
+   imprimirClientes() {
+       console.log("Listado de clientes: ")
+       for (let identificacion in this.hashMapClientes) {
+           console.log(`Identificación: ${identificacion}, Nombre: ${this.hashMapClientes[identificacion].nombre}, Dirección: ${this.hashMapClientes[identificacion].direccion}`);
+       }
+   }
+
 
 }
+

@@ -15,8 +15,8 @@
         </div>
         <div class="links-capsule">
             <ul class="links">
-                <li><a>Clientes</a></li>
-                <li><a>Productos</a></li>
+                <li><a href="#clientesForm" data-form-id="clientesForm">Clientes</a></li>
+                <li><a href="#productosForm" data-form-id="productosForm">Productos</a></li>
                 <li><a>Realizar Venta</a></li>
                 <li><a>Historial de Ventas</a></li>
                 <li><a>Inventario</a></li>
@@ -26,29 +26,41 @@
 
     <div class="content">
         <!--Diferentes formularios-->
-        <div class="centered-box" id="clientesForm">
+        <div class="centered-box form-container" id="clientesForm" style="display: none;">
             <h2>Registro de Clientes</h2>
             <form class="form-cliente"> 
                 <div class="box">
                     <label>Identificación</label>
                     <img src="/resources/images/logoId.png">
-                    <input type="number" placeholder="Identificación">
+                    <input type="number" id="identificacion" placeholder="Identificación">
                 </div>
                 <div class="box">
                     <label>Nombre</label>
                     <img src="/resources/images/logoNombre.png">
-                    <input type="text" placeholder="Nombre">
+                    <input type="text" id="nombre" placeholder="Nombre">
                 </div>
                 <div class="box">
                     <label>Dirección</label>
                     <img src="/resources/images/logoDireccion.png">
-                    <input type="text" placeholder="Número">
+                    <input type="text" id="direccion" placeholder="Dirección">
                 </div>
-                <button type="submit" id="subir"">Enviar</button>
+                <button class="btnCliente" type="submit" id="subir"">Registrar Cliente</button>
             </form>
+
+            <div class="box-tablaClientes">
+                <h2>Gestión de Clientes</h2>
+                <div class="tabla" id="tablaClientes">
+                    <!-- Aquí se genera dinamicamente la tabla de clientes -->
+                </div>
+                <button class="btnCliente" id="btnEliminarCliente">Eliminar Cliente</button>
+            </div>
+        </div>
+
+        <div class="centered-box form-container" id="productosForm" style="display: none;">
+            <label>Prueba</label>
         </div>
     </div>
 
-    <script src="/controller/IndexController.js"></script>
+    <script src="/controller/IndexController.js" type="module"></script>
 </body>
 </html>
