@@ -47,6 +47,20 @@ export default class Tienda {
     }
 
     /**
+     * Elimina un cliente del hashMap de clientes dado su id
+     * @param {*} idCliente 
+     */
+    eliminarCliente(idCliente) {
+        // Verifica si el cliente existe
+        if (this.hashMapClientes.hasOwnProperty(idCliente)) {
+            delete this.hashMapClientes[idCliente];
+            alert(`Cliente con identificación ${idCliente} eliminado.`);
+        } else {
+            alert(`El cliente con identificación ${idCliente} no existe.`);
+        }
+    }
+
+    /**
      * Imprime el hashMap de clientes
      */
     imprimirClientes() {

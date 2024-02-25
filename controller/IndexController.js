@@ -74,6 +74,61 @@ document.addEventListener('DOMContentLoaded', function() {
         tablaClientes.appendChild(tabla);
     }
 
+    //Eliminar cliente dado un cliente seleccionado en la tabla
+    const btnEliminarCliente = document.getElementById('btnEliminarCliente');
+    let clienteSeleccionado = null;
+
+    // Asociar un evento de clic a las filas de la tabla de clientes
+    tablaClientes.addEventListener('click', function(event) {
+        // Obtener la fila en la que se hizo clic
+        const filaCliente = event.target.closest('tr');
+        if (!filaCliente) return; // Salir si no se hizo clic en una fila
+
+        // Eliminar la clase 'seleccionado' de la fila previamente seleccionada (si existe)
+        const filaSeleccionada = tablaClientes.querySelector('.seleccionado');
+        if (filaSeleccionada) {
+            filaSeleccionada.classList.remove('seleccionado');
+        }
+
+        // Agregar la clase 'seleccionado' a la fila actual
+        filaCliente.classList.add('seleccionado');
+
+        // Actualizar la variable clienteSeleccionado con la fila seleccionada
+        clienteSeleccionado = filaCliente.cells[0].textContent;
+    });
+
+
+    // Asociar un evento al botón eliminar cliente
+    btnEliminarCliente.addEventListener('click', function() {
+        if (!clienteSeleccionado) {
+            // Si no se ha seleccionado ningún cliente, mostrar un mensaje de alerta
+            alert('Por favor selecciona un cliente en la tabla.');
+            return;
+        }
+
+        //Obtiene el id del cliente seleccionado
+        const idCliente = clienteSeleccionado;
+        //Llama a la funcion eliminar cliente y limpia la seleccion
+        eliminarCliente(idCliente);
+        // Eliminar la clase 'seleccionado' de la fila de la tabla seleccionada
+        const filaSeleccionada = tablaClientes.querySelector('.seleccionado');
+        if (filaSeleccionada) {
+            filaSeleccionada.classList.remove('seleccionado');
+        }
+        // Limpiar la selección
+        clienteSeleccionado = null;
+    });
+
+    /**
+     * Llama a la tienda para eliminar un cliente dado su id    
+     * @param {*} idCliente 
+     */
+    function eliminarCliente(idCliente) {
+        tienda.eliminarCliente(idCliente);
+        //Actualizo la tabla
+        mostrarClientes();
+    }
+
 });
 
 //Manejo de los links de la app para el cambio de contenido
