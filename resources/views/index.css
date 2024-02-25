@@ -79,8 +79,9 @@ body {
 }    
 
 .centered-box {
-    height: 900px;
-    width: 800px;
+    display: inline-block;
+    min-height: 450px;
+    min-width: 800px;
     background-color: #fbfef9;
     padding: 20px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); 
@@ -171,6 +172,10 @@ body {
     transform-style: preserve-3d;
     -webkit-transition: background 150ms cubic-bezier(0, 0, 0.58, 1), -webkit-transform 150ms cubic-bezier(0, 0, 0.58, 1);
     transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), background 150ms cubic-bezier(0, 0, 0.58, 1), -webkit-transform 150ms cubic-bezier(0, 0, 0.58, 1);   
+}
+
+.box-tablaClientes .btnCliente {
+    margin-bottom: 30px;
 }
 
 .btnCliente::before {
