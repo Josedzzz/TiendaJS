@@ -1,10 +1,10 @@
 import Tienda from "../model/Tienda.js";
 
-//Se crea la instancia de la tienda
-let tienda = new Tienda("TiendaJS", "Quimbaya");
-tienda.test();
-
 document.addEventListener('DOMContentLoaded', function() {
+    // Crear una instancia de la clase Tienda
+    const tienda = new Tienda("TiendaJS", "Quimbaya");
+    tienda.test();
+
     //Obtener el formulario y el botón de registrar cliente
     const formCliente = document.querySelector('.form-cliente');
     const btnRegistrarCliente = document.getElementById('subir');
@@ -20,10 +20,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Llamar al método registrarCliente de la clase Tienda
         tienda.registrarCliente(identificacion, nombre, direccion);
-
+        mostrarClientes();
         //Limpiar los campos del formulario (opcional)
         formCliente.reset();
     });
+
+    //Manejo de la tabla de clientes de la app
+    const tablaClientes = document.getElementById('tablaClientes');
+
+    function mostrarClientes() {
+        // Limpia la tabla antes de actualizarla
+        tablaClientes.innerHTML = '';
+    
+        // Crear la tabla
+        const tabla = document.createElement('table');
+        tabla.classList.add('tabla-clientes'); // Agregar clase para la tabla
+    
+        // Encabezado de la tabla
+        const encabezados = ['Identificación', 'Nombre', 'Dirección'];
+        const encabezadosRow = document.createElement('tr');
+        encabezados.forEach(encabezado => {
+            const th = document.createElement('th');
+            th.textContent = encabezado;
+            encabezadosRow.appendChild(th);
+        });
+        tabla.appendChild(encabezadosRow);
+    
+        // Obtener el HashMap de clientes utilizando el método getClientes()
+        const hashMapClientes = tienda.getClientes();
+    
+        // Filas de clientes
+        for (const identificacion in hashMapClientes) {
+            const cliente = hashMapClientes[identificacion];
+            const fila = document.createElement('tr');
+            fila.classList.add('fila-cliente'); // Agregar clase para la fila
+    
+            const identificacionCell = document.createElement('td');
+            identificacionCell.textContent = identificacion;
+            fila.appendChild(identificacionCell);
+    
+            const nombreCell = document.createElement('td');
+            nombreCell.textContent = cliente.nombre;
+            fila.appendChild(nombreCell);
+    
+            const direccionCell = document.createElement('td');
+            direccionCell.textContent = cliente.direccion;
+            fila.appendChild(direccionCell);
+    
+            tabla.appendChild(fila);
+        }
+    
+        // Agregar la tabla al contenedor
+        tablaClientes.appendChild(tabla);
+    }
+
 });
 
 //Manejo de los links de la app para el cambio de contenido

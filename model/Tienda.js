@@ -14,6 +14,10 @@ export default class Tienda {
         this.listCarritos = [];
     }
 
+    getClientes() {
+        return this.hashMapClientes;
+    }
+
     //Ejemplo de un metodo para agregar un producto
 
     /**
