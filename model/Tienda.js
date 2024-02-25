@@ -16,8 +16,8 @@ export default class Tienda {
         this.nombre = nombre;
         this.direccion = direccion;
         this.cantidadVentas = 0;
-        this.listaProductos = new Map(); //Se inicializa un hashMap con new Map().  Se puede usar un objeto {} Pero Map es mas eficiente.
-        this.listaClientes = new Map(); 
+        this.hashMapProductos = new Map(); //Se inicializa un hashMap con new Map().  Se puede usar un objeto {} Pero Map es mas eficiente.
+        this.hashMapClientes = new Map(); 
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
         this.listaCarritos = [];
     }
