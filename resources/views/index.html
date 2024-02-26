@@ -56,8 +56,46 @@
             </div>
         </div>
 
+
         <div class="centered-box form-container" id="productosForm" style="display: none;">
-            <label>Prueba</label>
+
+            <div class="left-content">
+                <h2>Registro de Productos</h2>
+                <form class="form-producto">
+                    <div class="box">
+                        <label>Nombre</label>
+                        <img src="/resources/images/logoNombreProducto.png">
+                        <input type="text" id="nombre-producto" placeholder="Nombre">
+                    </div>
+                    <div class="box">
+                        <label>Código</label>
+                        <img src="/resources/images/logoCodigoProducto.png">
+                        <input type="text" id="codigo-producto" placeholder="Código">
+                    </div>
+                    <div class="box">
+                        <label>Precio</label>
+                        <img src="/resources/images/logoPrecioProducto.png">
+                        <input type="number" id="precio-producto" placeholder="Precio">
+                    </div>
+                    <div class="box">
+                        <label>Cantidad</label>
+                        <img src="/resources/images/logoCantidadProducto.png">
+                        <input type="number" id="cantidad-producto" placeholder="Cantidad en inventario">
+                    </div>
+                    <button class="btnCliente" type="submit" id="subirProducto">Registrar Producto</button>
+                </form>
+            </div>
+
+            <div class="right-content">
+                <h2>Gestión de Productos</h2>
+                <div class="box-tablaProductos">
+                    <div class="tabla" id="tablaProductos">
+                        <!-- Aquí se genera dinamicamente la tabla de productos -->
+                    </div>
+                    <button class="btnCliente" id="btnEliminarProducto">Eliminar Producto</button>
+                    <button class="btnCliente" id="btnActualizarProducto">Actualizar Producto</button>
+                </div>
+            </div>
         </div>
     </div>
 
