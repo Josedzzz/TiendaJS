@@ -174,10 +174,6 @@ body {
     transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), background 150ms cubic-bezier(0, 0, 0.58, 1), -webkit-transform 150ms cubic-bezier(0, 0, 0.58, 1);   
 }
 
-.box-tablaClientes .btnCliente {
-    margin-bottom: 30px;
-}
-
 .btnCliente::before {
     position: absolute;
     content: '';
@@ -220,10 +216,6 @@ body {
     box-shadow: 0 0 0 2px #ffcd70, 0 0 #ffeac2;
     -webkit-transform: translate3d(0, 0, -1em);
     transform: translate3d(0, 0, -1em);
-}
-
-.box-tablaClientes {
-    margin-top: 50px;
 }
 
 .tabla {
