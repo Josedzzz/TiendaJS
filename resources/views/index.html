@@ -104,11 +104,54 @@
         </div>
 
         <div class="centered-box form-container" id="realizarVenta" style="display: none;">
+            
+            <div class="left-content">
+                <h2>Información de la Venta</h2>
+                <form class="form-venta">
+                    <div class="box">
+                        <label>Código</label>
+                        <img src="/resources/images/logoCodigoProducto.png">
+                        <input type="number" id="codigo-venta" placeholder="Código de venta">
+                    </div>
+                    <div class="box">
+                        <label>Cliente</label>
+                        <img src="/resources/images/logoId.png">
+                        <input type="text" id="cliente-venta" placeholder="Id del cliente">
+                    </div>
+                    <div class="box">
+                        <label>Fecha</label>
+                        <img src="/resources/images/logoFechaVenta.png">
+                        <input type="date" id="fecha-venta" placeholder="Fecha">
+                    </div>
+                    <div class="box">
+                        <label>Total</label>
+                        <img src="/resources/images/logoTotalVenta.png">
+                        <input type="text" id="total-venta" placeholder="Total de la venta">
+                    </div>
+                    <button class="btnCliente" type="submit" id="subirVenta">Agregar Venta</button>
+                    <button class="btnCliente" type="submit" id="gestionarVenta">Gestionar Venta</button>
+                </form>
+            </div>
+
+            <div class="right-content">
+                <h2>Gestión de Ventas</h2>
+                <div class="box-tablaVentas">
+                    <div class="tabla" id="tablaVentas">
+                        <!-- Aquí se genera dinamicamente la tabla de productos -->
+                    </div>
+                    <button class="btnCliente" id="btnEliminarVenta">Eliminar Venta</button>
+                </div>
+            </div>
 
         </div>
 
         <div class="centered-box form-container" id="inventario" style="display: none;">
-
+            <h2>Lista de productos</h2>
+            <div class="box-tablaProductosInventario">
+                <div class="tabla" id="tablaProductosInventario">
+                    <!-- Aquí se genera dinamicamente la tabla de productos -->
+                </div>
+            </div>
         </div>
 
         <div class="centered-box form-container" id="carritoCompras" style="display: none;">
