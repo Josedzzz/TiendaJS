@@ -227,6 +227,7 @@ body {
 }
 
 .tabla-clientes {
+    font-size: 14px;
     border-collapse: collapse;
     width: 100%;
 }
@@ -246,7 +247,7 @@ body {
 }
 
 .tabla tr.seleccionado {
-    background-color: lightblue;
+    background-color: #ffbf47;
 }
 
 /*Edicion del formulario para productos*/
@@ -325,15 +326,15 @@ body {
     width: 40px;
 }
 
-/*Edicion para el formulario de gestion de ventas*/
+/*Edicion para el formulario de carrito*/
 
-.form-detalleVenta {
+.form-carrito {
     font-size: 14px;
     font-weight: bold;
     color: #070707;
 }
 
-.form-detalleVenta input {
+.form-carrito input {
     margin-top: 5px;
     margin-bottom: 15px;
     border-radius: 10px;
@@ -346,12 +347,12 @@ body {
     transition: 0.25s;
 }
 
-.form-detalleVenta input:focus {
+.form-carrito input:focus {
     outline-offset: 5px;
     background-color: #fff  
 }
 
-.form-detalleVenta img {
+.form-carrito img {
     height: auto;
     width: 40px;
 }
