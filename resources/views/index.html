@@ -147,6 +147,43 @@
 
         <div class="centered-box form-container" id="gestionarVenta" style="display: none;">
 
+            <div class="left-content">
+                <h2>Información detalle venta</h2>
+                <form class="form-detalleVenta">
+                    <div class="box">
+                        <label>Código del producto</label>
+                        <img src="/resources/images/logoNombreProducto.png">
+                        <input type="number" id="codigo-producto-detalleVenta" placeholder="Código del producto">
+                    </div>
+                    <div class="box">
+                        <label>Cantidad</label>
+                        <img src="/resources/images/logoCantidadProducto.png">
+                        <input type="number" id="codigo-cantidad-detalleVenta" placeholder="Cantidad del producto">
+                    </div>
+                    <div class="box">
+                        <label>Código de la venta</label>
+                        <img src="/resources/images/logoCodigoProducto.png">
+                        <input type="number" id="codigo-venta-detalleVenta" placeholder="Código de la venta">
+                    </div>
+                    <div class="box">
+                        <label>Subtotal</label>
+                        <img src="/resources/images/logoPrecioProducto.png">
+                        <input type="number" id="codigo-subtotal-detalleVenta" placeholder="Subtotal">
+                    </div>
+                    <button class="btnCliente" type="submit" id="subirDetalleVenta">Agregar Producto</button>
+                </form>
+            </div>
+
+            <div class="right-content">
+                <h2>Detalles de la venta</h2>
+                <div class="box-tablaDetallesVenta">
+                    <div class="tabla" id="tablaDetallesVenta">
+                        <!-- Aqui se genera dinamicamente la tabla -->
+                    </div>
+                    <button class="btnCliente" type="submit" id="eliminarDetalleVenta">Eliminar Producto</button>
+                </div>
+            </div>
+
         </div>
 
         <div class="centered-box form-container" id="inventario" style="display: none;">
