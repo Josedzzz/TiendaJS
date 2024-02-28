@@ -1,3 +1,5 @@
+import Cliente from './Cliente.js'
+
 export default class Tienda {
 
     //El histórico de ventas queda pendiente. Toca decidir si cambiamos la lista de ventas por el historico de ventas o si dejamos ambas. Robinson recomendó usar un LinkedList para el histórico de ventas.
@@ -40,42 +42,82 @@ export default class Tienda {
     * @param {*} nombre 
     * @param {*} direccion 
     */
-   registrarCliente(identificacion, nombre, direccion) {
-       //Verifica si la identificacion ya existe
-       if (this.hashMapClientes.hasOwnProperty(identificacion)) {
-           alert("El cliente con identificacion " + identificacion + " ya está registrado")
-       } else {
-           //Si no existe se agrega al hashMap
-           this.hashMapClientes[identificacion] = {nombre, direccion};
-           alert("Cliente registrado con exito")
-           //Imprimo el hashMap de clientes para ver si si estan xd
-           this.imprimirClientes();
-       }
-   }
+    registrarCliente(identificacion, nombre, direccion) {
+        if (this.isCamposValidosCliente(identificacion, nombre, direccion)) {
+            if (this.hashMapClientes.has(identificacion)) {
+                alert("El cliente con identificacion " + identificacion + " ya está registrado")
+            } else {
+                const cliente = new Cliente(identificacion, nombre, direccion);
+                this.hashMapClientes.set(identificacion, cliente); 
+                alert("Cliente registrado con éxito");
+                //Imprimir el hashMap de clientes para verificar si se registró correctamente
+                console.log("Se registró el cliente:");
+                this.imprimirClientes();
+            }        
+        } else {
+            alert("Por favor asegurese de que los campos de cliente esten llenos");
+        }
+    }
 
    /**
     * Elimina un cliente del hashMap de clientes dado su id
     * @param {*} idCliente 
     */
-   eliminarCliente(idCliente) {
-       // Verifica si el cliente existe
-       if (this.hashMapClientes.hasOwnProperty(idCliente)) {
-           delete this.hashMapClientes[idCliente];
-           alert(`Cliente con identificación ${idCliente} eliminado.`);
-       } else {
-           alert(`El cliente con identificación ${idCliente} no existe.`);
-       }
-   }
+    eliminarCliente(idCliente) {
+        // Verifica si el cliente existe en el Map
+        if (this.hashMapClientes.has(idCliente)) {
+            this.hashMapClientes.delete(idCliente);
+            this.imprimirClientes();
+            alert(`Cliente con identificación ${idCliente} eliminado.`);
+        } else {
+            alert(`El cliente con identificación ${idCliente} no existe.`);
+        }
+    }
+
+    /**
+     * Actualiza el nombre y direccion de un cliente
+     * @param {*} identificacion 
+     * @param {*} nuevoNombre 
+     * @param {*} nuevaDireccion 
+     */
+    actualizarCliente(identificacion, nuevoNombre, nuevaDireccion) {
+        if (this.isCamposValidosCliente(identificacion, nuevoNombre, nuevaDireccion)) {
+            if (this.hashMapClientes.has(identificacion)) {
+                const cliente = this.hashMapClientes.get(identificacion);
+                cliente.setNombre(nuevoNombre);
+                cliente.setDireccion(nuevaDireccion);
+                alert(`Cliente con identificación ${identificacion} actualizado.`);
+            } else {
+                alert(`El cliente con identificación ${identificacion} no existe.`);
+            }
+        } else {
+            alert("Por favor asegurese de que los campos de cliente esten llenos");
+        }
+    }
+
+    /**
+     * Verifica que los campos para la manipulacion de clientes no esten vacios
+     * @param {*} identificacion 
+     * @param {*} nombre 
+     * @param {*} direccion 
+     * @returns 
+     */
+    isCamposValidosCliente(identificacion, nombre, direccion) {
+        if (!identificacion || !nombre || !direccion) {
+            return false;
+        } else {
+            return true;
+        } 
+    }
 
    /**
     * Imprime el hashMap de clientes
     */
-   imprimirClientes() {
-       console.log("Listado de clientes: ")
-       for (let identificacion in this.hashMapClientes) {
-           console.log(`Identificación: ${identificacion}, Nombre: ${this.hashMapClientes[identificacion].nombre}, Dirección: ${this.hashMapClientes[identificacion].direccion}`);
-       }
-   }
+    imprimirClientes() {
+        this.hashMapClientes.forEach((cliente) => {
+            console.log(cliente.toString());
+        });
+    }
 
 
 }

@@ -49,14 +49,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Obtener el HashMap de clientes utilizando el método getClientes()
         const hashMapClientes = tienda.getClientes();
     
+        // Convertir el HashMap a un array
+        const clientesArray = Array.from(hashMapClientes.values());
+    
         // Filas de clientes
-        for (const identificacion in hashMapClientes) {
-            const cliente = hashMapClientes[identificacion];
+        clientesArray.forEach(cliente => {
             const fila = document.createElement('tr');
             fila.classList.add('fila-cliente'); // Agregar clase para la fila
     
             const identificacionCell = document.createElement('td');
-            identificacionCell.textContent = identificacion;
+            identificacionCell.textContent = cliente.identificacion;
             fila.appendChild(identificacionCell);
     
             const nombreCell = document.createElement('td');
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fila.appendChild(direccionCell);
     
             tabla.appendChild(fila);
-        }
+        });
     
         // Agregar la tabla al contenedor
         tablaClientes.appendChild(tabla);
@@ -126,6 +128,34 @@ document.addEventListener('DOMContentLoaded', function() {
     function eliminarCliente(idCliente) {
         tienda.eliminarCliente(idCliente);
         //Actualizo la tabla
+        mostrarClientes();
+    }
+
+    //Obtener el boton para actualizar cliente
+    const btnActualizarCliente = document.getElementById('btnActualizarCliente');
+
+    //Se asocia un evento al boton de actualizar cliente
+    btnActualizarCliente.addEventListener('click', function() {
+        if (!clienteSeleccionado) {
+            alert('Por favor seleccione un cliente en la tabla.');
+            return;
+        }
+        const idCliente = clienteSeleccionado;
+        const nuevoNombre = document.getElementById('nombre').value;
+        const nuevaDireccion = document.getElementById('direccion').value;
+        actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+        formCliente.reset();
+    });
+
+    /**
+     * Llama a la tienda para actualizar los datos de un cliente
+     * @param {*} idCliente 
+     * @param {*} nuevoNombre 
+     * @param {*} nuevaDireccion 
+     */
+    function actualizarCliente(idCliente, nuevoNombre, nuevaDireccion) {
+        tienda.actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+        //Actualizo la tabla 
         mostrarClientes();
     }
 

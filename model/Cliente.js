@@ -1,4 +1,4 @@
-class Cliente {
+export default class Cliente {
 
     /**
      * Constructor de la clase cliente.
@@ -16,6 +16,50 @@ class Cliente {
         this.direccion = direccion;
         this.carritoCompras = new Map();
         this.listaCompras = [];
+    }
+
+    /**
+     * Metodo para obtener la identificacion de un cliente 
+     * @returns 
+     */
+    getIdentificacion() {
+        return this.identificacion;
+    }
+
+    /**
+     * Metodo para obtener el nombre del cliente
+     * @returns 
+     */
+    getNombre() {
+        return this.nombre;
+    }
+
+    /**
+     * Metodo para obtener la direccion del cliente
+     * @returns 
+     */
+    getDireccion() {
+        return this.direccion;
+    }
+
+    /**
+     * Metodo para establecer el nombre del cliente
+     * @param {*} nuevoNombre 
+     */
+    setNombre(nombre) {
+        this.nombre = nombre;
+    }
+
+    /**
+     * Metodo para establecer la direccion
+     * @param {*} direccion 
+     */
+    setDireccion(direccion) {
+        this.direccion = direccion;
+    }
+
+    toString() {
+        return `Cliente: ${this.nombre}, Identificacion: ${this.identificacion}, Direccion: ${this.direccion}`;
     }
 
 }
