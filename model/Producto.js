@@ -1,4 +1,4 @@
-class Producto {
+export default class Producto {
 
     /**
      * Constructor de la clase producto
@@ -12,6 +12,42 @@ class Producto {
         this.nombre = nombre;
         this.precio = precio;
         this.cantidad = cantidad;
+    }
+
+    getCodigo() {
+        return this.codigo;
+    }
+
+    getNombre() {
+        return this.nombre;
+    }
+
+    getPrecio() {
+        return this.precio;
+    }
+
+    getCantidad() {
+        return this.cantidad;
+    }
+
+    setCodigo(codigo) {
+        this.codigo = codigo;
+    }
+
+    setNombre(nombre) {
+        this.nombre = nombre;
+    }
+
+    setPrecio(precio) {
+        this.precio = precio;
+    }
+
+    setCantidad(cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    toString() {
+        return `Producto: ${this.nombre}, Codigo: ${this.codigo}, Precio: ${this.precio}, Cantidad: ${this.cantidad}`;
     }
 
 }

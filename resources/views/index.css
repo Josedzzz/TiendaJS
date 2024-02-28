@@ -295,6 +295,27 @@ body {
     width: 40px;
 }
 
+.tabla-productos {
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-productos th, .tabla-productos td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-productos th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.fila-producto:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+
 /*Edicion para el formulario de ventas*/
 
 .form-venta {

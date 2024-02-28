@@ -1,4 +1,5 @@
 import Cliente from './Cliente.js'
+import Producto from './Producto.js';
 
 export default class Tienda {
 
@@ -28,7 +29,11 @@ export default class Tienda {
         return this.hashMapClientes;
     }
 
-    //Ejemplo de un metodo para agregar un producto
+    getProductos() {
+        return this.hashMapProductos;
+    }
+
+    //CRUD DE CLIENTES --------------------------------------------------------------------------------
 
     /**
      * Test para saber que si se conecto la tienda correctamente
@@ -50,7 +55,7 @@ export default class Tienda {
                 const cliente = new Cliente(identificacion, nombre, direccion);
                 this.hashMapClientes.set(identificacion, cliente); 
                 alert("Cliente registrado con éxito");
-                //Imprimir el hashMap de clientes para verificar si se registró correctamente
+                //Imprimir el hashMap de clientes para verificar si se registro correctamente
                 console.log("Se registró el cliente:");
                 this.imprimirClientes();
             }        
@@ -119,6 +124,93 @@ export default class Tienda {
         });
     }
 
+    //CRUD DE PRODUCTOS -----------------------------------------------------------------------------------
+
+    /**
+     * Registra un producto siempre y cuando su codigo no exista
+     * @param {*} codigo 
+     * @param {*} nombre 
+     * @param {*} precio 
+     * @param {*} cantidad 
+     */
+    registrarProducto(codigo, nombre, precio, cantidad) {
+        if (this.isCamposValidosProducto(codigo, nombre, precio, cantidad)) {
+            if (this.hashMapProductos.has(codigo)) {
+                alert("El producto con el codigo " + codigo + " ya está registrado");
+            } else {
+                const producto = new Producto(codigo, nombre, precio, cantidad);
+                this.hashMapProductos.set(codigo, producto);
+                alert("Producto registrado con éxito");
+                //Imprimir el hashMap de productos para verificar si se registro correctamente
+                console.log("Se registró el producto")
+                this.imprimirProductos();
+            }
+        } else {
+            alert("Por favor asegurese de que los campos del producto esten llenos");
+        }
+    }
+
+    /**
+     * Elimina un producto del hashMap de productos dado su codigo
+     * @param {*} codigoProducto 
+     */
+    eliminarProducto(codigoProducto) {
+        if (this.hashMapProductos.has(codigoProducto)) {
+            this.hashMapProductos.delete(codigoProducto);
+            this.imprimirProductos();
+            alert(`Producto con código ${codigoProducto} eliminado.`);
+        } else {
+            alert(`Producto con código ${codigoProducto} no existe.`);
+        }
+    }
+
+    /**
+     * Actualiza el nombre, el precio y la cantidad de un producto 
+     * @param {*} codigo 
+     * @param {*} nuevoNombre 
+     * @param {*} nuevoPrecio 
+     * @param {*} nuevaCantidad 
+     */
+    actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
+        if (this.isCamposValidosProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad)) {
+            if (this.hashMapProductos.has(codigo)) {
+                const producto = this.hashMapProductos.get(codigo);
+                producto.setNombre(nuevoNombre);
+                producto.setPrecio(nuevoPrecio);
+                producto.setCantidad(nuevaCantidad);
+                alert(`Producto con código ${codigo} actualizado.`);
+            } else {
+                alert(`El producto con código ${codigo} no existe.`);
+            }
+        } else {
+            alert("Por favor asegurese de que los campos de producto esten llenos");
+        }
+    }
+
+    /**
+     * Verifica que los campos para la manipulacion de productos no esten vacios
+     * @param {*} nombre 
+     * @param {*} codigo 
+     * @param {*} precio 
+     * @param {*} cantidad 
+     * @returns 
+     */
+    isCamposValidosProducto(codigo, nombre, precio, cantidad) {
+        if (!codigo || !nombre || !precio || !cantidad) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Imprime el hashMap de productos
+     */
+    imprimirProductos() {
+        this.hashMapProductos.forEach((producto) => {
+            console.log(producto.toString());
+        });
+    }
 
 }
 

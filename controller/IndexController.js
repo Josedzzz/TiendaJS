@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const tienda = new Tienda("TiendaJS", "Quimbaya");
     tienda.test();
 
-    //Obtener el formulario y el botón de registrar cliente
+    //Obtener el formulario y el boton de registrar cliente
     const formCliente = document.querySelector('.form-cliente');
     const btnRegistrarCliente = document.getElementById('subir');
 
-    //Agregar un evento de click al botón de registrar cliente
+    //Agregar un evento de click al boton de registrar cliente
     btnRegistrarCliente.addEventListener('click', function(event) {
         event.preventDefault(); // Evitar que el formulario se envíe
 
@@ -157,6 +157,160 @@ document.addEventListener('DOMContentLoaded', function() {
         tienda.actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
         //Actualizo la tabla 
         mostrarClientes();
+    }
+
+    //MANEJO DE LA VENTANA DE PRODUCTOS -------------------------------------------------------------
+
+    //Variables auxiliares para la ventana
+    const formProducto = document.querySelector('.form-producto');
+    const btnRegistrarProducto = document.getElementById('btnRegistrarProducto');
+    const btnEliminarProducto = document.getElementById('btnEliminarProducto');
+    const btnActualizarProducto = document.getElementById('btnActualizarProducto');
+    const tablaProductos = document.getElementById('tablaProductos');
+    let productoSeleccionado = null;
+
+    //Funcion para mostrar los productos actuales de la tienda
+    function mostrarProductos() {
+        //Limpia la tabla de productos antes de actualizarla
+        tablaProductos.innerHTML = '';
+
+        //Crea la tabla
+        const tabla = document.createElement('table');
+        tabla.classList.add('tabla-productos');
+
+        //Encabezado de la tabla
+        const encabezados = ['Nombre', 'Código', 'Precio', 'Cantidad'];
+        const encabezadosRow = document.createElement('tr');
+        encabezados.forEach(encabezado => {
+            const th = document.createElement('th');
+            th.textContent = encabezado;
+            encabezadosRow.appendChild(th);
+        });
+        tabla.appendChild(encabezadosRow);
+
+        //Obtener el hashMap de productos y convertirlo en un array
+        const hashMapProductos = tienda.getProductos();
+        const productosArray = Array.from(hashMapProductos.values());
+
+        //Filas de productos
+        productosArray.forEach(producto => {
+            const fila = document.createElement('tr');
+            fila.classList.add('fila-producto');
+
+            const nombreCell = document.createElement('td');
+            nombreCell.textContent = producto.nombre;
+            fila.appendChild(nombreCell);
+
+            const codigoCell = document.createElement('td');
+            codigoCell.textContent = producto.codigo;
+            fila.appendChild(codigoCell);
+
+            const precioCell = document.createElement('td');
+            precioCell.textContent = producto.precio;
+            fila.appendChild(precioCell);
+
+            const cantidadCell = document.createElement('td');
+            cantidadCell.textContent = producto.cantidad;
+            fila.appendChild(cantidadCell);
+
+            tabla.appendChild(fila);
+        });
+
+        //Agregar la tabla al contenedor
+        tablaProductos.appendChild(tabla);
+    }
+
+    //Asociar un evento click a las filas de la tabla de productos
+    tablaProductos.addEventListener('click', function(event) {
+        //Obtener la fila en la que se hizo click
+        const filaProducto = event.target.closest('tr');
+        if (!filaProducto) return; //Salir si no se hizo click
+
+        //Elimina la clase 'seleccionado' de la fila previamente seleccionada (si existe)
+        const filaSeleccionada = tablaProductos.querySelector('.seleccionado');
+        if (filaSeleccionada) {
+            filaSeleccionada.classList.remove('seleccionado');
+        }
+
+        //Agregar la clase 'seleccionado' a la fila actual
+        filaProducto.classList.add('seleccionado');
+
+        //Actualizo productoSeleccionado
+        productoSeleccionado = filaProducto.cells[1].textContent;
+        console.log("Producto seleccionado: " + productoSeleccionado);
+    });
+
+    //Agregar un evento de click al boton de registrarProducto
+    btnRegistrarProducto.addEventListener('click', function(event) {
+        event.preventDefault();
+        const nombreProducto = document.getElementById('nombre-producto').value;
+        const codigoProducto = document.getElementById('codigo-producto').value;
+        const precioProducto = document.getElementById('precio-producto').value;
+        const cantidadProducto = document.getElementById('cantidad-producto').value;
+        registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+        //Limpia los campos del formulario
+        formProducto.reset();
+    });
+
+    /**
+     * Llama a la tienda para registrar un nuevo producto
+     * @param {*} codigo 
+     * @param {*} nombre 
+     * @param {*} precio 
+     * @param {*} cantidad 
+     */
+    function registrarProducto(codigo, nombre, precio, cantidad) {
+        tienda.registrarProducto(codigo, nombre, precio, cantidad);
+        //Actualizo la tabla
+        mostrarProductos();
+    }
+
+    //Asociar un evento al boton de eliminar producto
+    btnEliminarProducto.addEventListener('click', function() {
+        if (!productoSeleccionado) {
+            alert("Por favor seleccione un producto en la tabla.");
+            return;
+        }
+        const codigoProducto = productoSeleccionado;
+        eliminarProducto(codigoProducto);
+        productoSeleccionado = null;
+    });
+
+    /**
+     * Llama a la tienda para eliminar un producto dado su codigo
+     * @param {*} codigoProducto 
+     */
+    function eliminarProducto(codigoProducto) {
+        tienda.eliminarProducto(codigoProducto);
+        //Actualizo la tabla
+        mostrarProductos();
+    }
+
+    //Asociar un evento al boton de de actualizar producto
+    btnActualizarProducto.addEventListener('click', function() {
+        if (!productoSeleccionado) {
+            alert("Por favor seleccione un producto en la tabla.");
+            return;
+        }
+        const codigoProducto = productoSeleccionado;
+        const nombreProducto = document.getElementById('nombre-producto').value;
+        const precioProducto = document.getElementById('precio-producto').value;
+        const cantidadProducto = document.getElementById('cantidad-producto').value;
+        actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+        formProducto.reset();
+    });
+
+    /**
+     * Llama a la tienda para actualizar los datos de un producto
+     * @param {*} codigo 
+     * @param {*} nuevoNombre 
+     * @param {*} nuevoPrecio 
+     * @param {*} nuevaCantidad 
+     */
+    function actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
+        tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
+        //Actualizo la tabla
+        mostrarProductos();
     }
 
 });
