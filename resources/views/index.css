@@ -247,7 +247,7 @@ body {
 }
 
 .tabla tr.seleccionado {
-    background-color: #ffbf47;
+    background-color: #ffcd70;
 }
 
 /*Edicion del formulario para productos*/
@@ -376,4 +376,28 @@ body {
 .form-carrito img {
     height: auto;
     width: 40px;
+}
+
+.form-carrito .box button {
+    margin-bottom: 40px;
+}
+
+.tabla-productos-carrito {
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-productos-carrito th, .tabla-productos-carrito td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-productos-carrito th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.fila-producto-carrito:nth-child(even) {
+    background-color: #f2f2f2;
 }

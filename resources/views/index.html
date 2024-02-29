@@ -109,6 +109,12 @@
                 <h2>Gestionar Carrito</h2>
                 <form class="form-carrito">
                     <div class="box">
+                        <label>Identificación del Cliente</label>
+                        <img src="/resources/images/logoId.png">
+                        <input type="number" id="identificacion-cliente-carrito" placeholder="Id del cliente">
+                        <button class="btnCliente" id="btnMostrarCarritoCliente">Mostrar Carrito</button>
+                    </div>
+                    <div class="box">
                         <label>Código del producto</label>
                         <img src="/resources/images/logoNombreProducto.png">
                         <input type="number" id="codigo-producto-carrito" placeholder="Código del producto">
@@ -116,24 +122,19 @@
                     <div class="box">
                         <label>Cantidad</label>
                         <img src="/resources/images/logoCantidadProducto.png">
-                        <input type="number" id="codigo-cantidad-carrito" placeholder="Cantidad del producto">
+                        <input type="number" id="cantidad-producto-carrito" placeholder="Cantidad del producto">
                     </div>
-                    <div class="box">
-                        <label>Identificación del Cliente</label>
-                        <img src="/resources/images/logoId.png">
-                        <input type="number" id="codigo-identificacion-carrito" placeholder="Id del cliente">
-                    </div>
-                    <button class="btnCliente" type="submit" id="subirDetalleVenta">Agregar Producto</button>
+                    <button class="btnCliente" type="submit" id="btnAgregarProductoCarrito">Agregar Producto</button>
                 </form>
             </div>
 
             <div class="right-content">
                 <h2>Detalles del carrito</h2>
                 <div class="box-tablaDetallesCarrito">
-                    <div class="tabla" id="box-tablaDetallesCarrito">
+                    <div class="tabla" id="tablaProductosCarrito">
                         <!-- Aqui se genera dinamicamente la tabla -->
                     </div>
-                    <button class="btnCliente" type="submit" id="eliminarProductoCarrito">Eliminar Producto</button>
+                    <button class="btnCliente" id="btnEliminarProductoCarrito">Eliminar Producto</button>
                 </div>
             </div>
 

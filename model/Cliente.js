@@ -22,7 +22,7 @@ export default class Cliente {
      * Metodo para obtener la identificacion de un cliente 
      * @returns 
      */
-    getIdentificacion() {
+    getIdentificacion(identificacion) {
         return this.identificacion;
     }
 
@@ -40,6 +40,14 @@ export default class Cliente {
      */
     getDireccion() {
         return this.direccion;
+    }
+
+    /**
+     * Metodo para obtener el carrito de compras de un cliente
+     * @returns 
+     */
+    getCarritoCompras() {
+        return this.carritoCompras;
     }
 
     /**

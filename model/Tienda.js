@@ -212,5 +212,56 @@ export default class Tienda {
         });
     }
 
+    //MANEJO DE CARRITO DE COMPRAS -----------------------------------------------------------------------
+
+    /**
+     * Obtiene el carrito de compras de un cliente especifico dada su identificacion
+     * @param {*} identificacion 
+     * @returns 
+     */
+    getCarritoComprasCliente(identificacion) {
+        const cliente = this.hashMapClientes.get(identificacion);
+        if (cliente) {
+            return cliente.getCarritoCompras();
+        } else {
+            alert("La identificación ingresada no existe en la tienda.")
+            return null;
+        }
+    }
+
+    /**
+     * Agrega un producto al carrito de un cliente con su cantidad
+     * @param {*} idCliente 
+     * @param {*} codigoProducto 
+     * @param {*} cantidadProducto 
+     */
+    agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto) {
+        const carritoCompras = this.getCarritoComprasCliente(idCliente);
+        const producto = this.hashMapProductos.get(codigoProducto);
+        //Revisa si el producto existe
+        if (producto) {
+            carritoCompras.set(producto, cantidadProducto);
+            alert(`Se agregaron ${cantidadProducto} unidades de ${producto.nombre} al carrito.`)
+        } else {
+            alert('Codigo del producto no valido');
+        }
+    }
+
+    /**
+     * Elimina un producto del carrito de un cliente
+     * @param {*} idCliente 
+     * @param {*} codigoProducto 
+     */
+    eliminarProductoCarrito(idCliente, codigoProducto) {
+        const carritoCompras = this.getCarritoComprasCliente(idCliente);
+        const producto = this.hashMapProductos.get(codigoProducto);
+        if (producto && carritoCompras.has(producto)) {
+            carritoCompras.delete(producto);
+            alert(`El producto ${producto.nombre} ha sido eliminado del carrito.`);
+        } else {
+            alert('El producto no existe en el carrito.');
+        }
+    }
+
 }
 
