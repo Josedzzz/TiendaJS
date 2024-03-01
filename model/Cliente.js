@@ -70,4 +70,11 @@ export default class Cliente {
         return `Cliente: ${this.nombre}, Identificacion: ${this.identificacion}, Direccion: ${this.direccion}`;
     }
 
+    /**
+     * Vacia el carrito de compras de un cliente cuando este ya hace una compra
+     */
+    vaciarCarrito() {
+        this.carritoCompras.clear();
+    }
+
 }

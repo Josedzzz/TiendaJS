@@ -433,9 +433,132 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asocia un evento al boton de mostrar el carrito de un cliente
-    btnMostrarCarritoCliente.addEventListener('click', function() {
+    btnMostrarCarritoCliente.addEventListener('click', function(event) {
+        event.preventDefault();
         mostrarProductosCarrito();
     });
+
+    //MANEJO DE LA VENTANA DE VENTA -----------------------------------------------------------------------
+
+    const formVenta = document.querySelector('.form-venta');
+    const btnAgregarVenta = document.getElementById('btnAgregarVenta');
+    const btnEliminarVenta = document.getElementById('btnEliminarVenta');
+    const tablaVentas = document.getElementById('tablaVentas');
+    let ventaSeleccionada = null;
+
+    //Funcion para mostrar las ventas actuales de la tienda
+    function mostrarVentas() {
+        //Limpia las ventas antes de actualizarlas
+        tablaVentas.innerHTML = '';
+
+        //Crea la tabla
+        const tabla = document.createElement('table');
+        tabla.classList.add('tabla-ventas');
+        
+        //Encabezado de la lista
+        const encabezados = ["Código", "Fecha", "Total", "Cliente"];
+        const encabezadosRow = document.createElement('tr');
+        encabezados.forEach(encabezado => {
+            const th = document.createElement('th');
+            th.textContent = encabezado;
+            encabezadosRow.appendChild(th);
+        });
+        tabla.appendChild(encabezadosRow);
+
+        //Obtener la lista de ventas de la tienda
+        const listaVentas = tienda.getVentas();
+
+        //Add ventas a la tabla
+        listaVentas.forEach(venta => {
+            const fila = document.createElement('tr');
+            fila.classList.add('fila-venta');
+
+            const codigoCell = document.createElement('td');
+            codigoCell.textContent = venta.codigo;
+            fila.appendChild(codigoCell);
+
+            const fechaCell = document.createElement('td');
+            fechaCell.textContent = venta.fecha;
+            fila.appendChild(fechaCell);
+
+            const totalCell = document.createElement('td');
+            totalCell.textContent = venta.total;
+            fila.appendChild(totalCell);
+
+            const idClienteCell = document.createElement('td');
+            idClienteCell.textContent = venta.cliente.identificacion;
+            fila.appendChild(idClienteCell);
+
+            tabla.appendChild(fila);
+        });
+
+        //Agregar la tabla al contenedor
+        tablaVentas.appendChild(tabla);
+    }
+
+    //Asociar un evento click a las filas de la tabla de ventas
+    tablaVentas.addEventListener('click', function(event) {
+        //Obtener la fila en la que se hizo click
+        const filaVenta = event.target.closest('tr');
+        if (!filaVenta) return;
+
+        //Elimina la clase 'seleccionado' de la fila previamente seleccionada (si existe)
+        const filaSeleccionada = tablaVentas.querySelector('.seleccionado');
+        if (filaSeleccionada) {
+            filaSeleccionada.classList.remove('seleccionado');
+        }
+
+        //Agregar la clase 'seleccionado' a la fila actual
+        filaVenta.classList.add('seleccionado');
+        
+        //Actualizo la venta seleccionada
+        ventaSeleccionada = filaVenta.cells[0].textContent;
+        console.log("Venta seleccionada " + ventaSeleccionada);
+    });
+
+    //Agregar un evento de click al boton de registrar venta
+    btnAgregarVenta.addEventListener('click', function(event) {
+        event.preventDefault();
+        const codigoVenta = document.getElementById('codigo-venta').value;
+        const idClienteVenta = document.getElementById('cliente-venta').value;
+        const fechaVenta = document.getElementById('fecha-venta').value;
+        registrarVenta(codigoVenta, idClienteVenta, fechaVenta);
+        //Limpia los campos del formulario
+        formVenta.reset();  
+    });
+
+    /**
+     * Llama a la tienda para realizar una venta
+     * @param {*} codigoVenta 
+     * @param {*} idClienteVenta 
+     * @param {*} fechaVenta 
+     */
+    function registrarVenta(codigoVenta, idClienteVenta, fechaVenta) {
+        tienda.realizarVenta(codigoVenta, idClienteVenta, fechaVenta);
+        //Actualizo la tabla de ventas
+        mostrarVentas();
+    }
+
+    //Agrega un evento de click al boton de eliminar venta
+    btnEliminarVenta.addEventListener('click', function() {
+        if (!ventaSeleccionada) {
+            alert("Por favor seleccione una venta en la tabla.");
+            return;
+        }
+        const codigoVenta = ventaSeleccionada;
+        eliminarVenta(codigoVenta);
+        ventaSeleccionada = null;
+    });
+
+    /**
+     * Llama a la tienda para eliminar una venta dado si codigo
+     * @param {*} codigoVenta 
+     */
+    function eliminarVenta(codigoVenta) {
+        tienda.eliminarVenta(codigoVenta);
+        //Actualizo la tabla
+        mostrarVentas();
+    }
 
 });
 

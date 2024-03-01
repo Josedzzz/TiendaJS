@@ -1,4 +1,4 @@
-class DetalleVenta {
+export default class DetalleVenta {
 
     constructor(producto, cantidad, subtotal) {
         this.producto = producto;

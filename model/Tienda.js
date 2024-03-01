@@ -1,5 +1,7 @@
 import Cliente from './Cliente.js'
 import Producto from './Producto.js';
+import Venta from './Venta.js';
+import DetalleVenta from './DetalleVenta.js';
 
 export default class Tienda {
 
@@ -18,11 +20,9 @@ export default class Tienda {
     constructor(nombre, direccion) {
         this.nombre = nombre;
         this.direccion = direccion;
-        this.cantidadVentas = 0;
         this.hashMapProductos = new Map(); //Se inicializa un hashMap con new Map().  Se puede usar un objeto {} Pero Map es mas eficiente.
         this.hashMapClientes = new Map(); 
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
-        this.listaCarritos = [];
     }
 
     getClientes() {
@@ -31,6 +31,10 @@ export default class Tienda {
 
     getProductos() {
         return this.hashMapProductos;
+    }
+
+    getVentas() {
+        return this.listaVentas;
     }
 
     //CRUD DE CLIENTES --------------------------------------------------------------------------------
@@ -261,6 +265,94 @@ export default class Tienda {
         } else {
             alert('El producto no existe en el carrito.');
         }
+    }
+
+    //MANEJO DE VENTAS ---------------------------------------------------------------------------------
+
+    /**
+     * Realiza una venta en la tienda
+     * @param {*} codigoVenta 
+     * @param {*} idCliente 
+     * @param {*} fecha 
+     * @returns 
+     */
+    realizarVenta(codigoVenta, idCliente, fecha) {
+        // Verificar si el código de venta ya esta en la lista de ventas
+        if (this.listaVentas.some(venta => venta.codigo === codigoVenta)) {
+            alert(`El código de venta "${codigoVenta}" ya está en uso.`);
+            return;
+        }
+
+        // Encontrar el cliente
+        const cliente = this.hashMapClientes.get(idCliente);
+        if (!cliente) {
+            alert(`El cliente con ID "${idCliente}" no existe.`);
+            return;
+        }
+
+        // Obtener el carrito de compras del cliente
+        const carritoCompras = this.getCarritoComprasCliente(idCliente);
+        if (!carritoCompras) {
+            alert(`No se pudo obtener el carrito de compras del cliente con ID "${idCliente}".`);
+            return;
+        }
+
+        // Crear los detalles de la venta
+        const detallesVenta = [];
+        for (const [producto, cantidad] of carritoCompras) {
+            if (cantidad > producto.cantidad) {
+                alert(`La cantidad solicitada de "${producto.nombre}" excede la cantidad disponible en el inventario.`);
+                return;
+            }
+            const subtotal = cantidad * producto.precio;
+            const detalleVenta = new DetalleVenta(producto, cantidad, subtotal);
+            detallesVenta.push(detalleVenta);
+        }
+
+        // Calcular el total de la venta
+        const totalVenta = detallesVenta.reduce((total, detalle) => total + detalle.subtotal, 0);
+
+        // Crear la venta
+        const venta = new Venta(codigoVenta, fecha, totalVenta, cliente, detallesVenta);
+        console.log(venta.listaDetalles);
+
+        // Agregar la venta a la lista de ventas de la tienda
+        this.listaVentas.push(venta);
+
+        // Actualizar la cantidad de productos en el inventario
+        for (const [producto, cantidad] of carritoCompras) {
+            producto.cantidad -= cantidad;
+        }
+        cliente.vaciarCarrito();
+
+        alert('Venta realizada con éxito:', venta.codigo);
+    }
+
+    /**
+     * Elimina una venta de la tienda dado si codigo
+     * @param {*} codigoVenta 
+     * @returns 
+     */
+    eliminarVenta(codigoVenta) {
+        // Buscar la venta en la lista de ventas
+        const ventaIndex = this.listaVentas.findIndex(venta => venta.codigo === codigoVenta);
+        if (ventaIndex === -1) {
+            console.log(`No se encontró ninguna venta con el código ${codigoVenta}.`);
+            return;
+        }
+
+        // Obtener la venta a eliminar
+        const ventaEliminada = this.listaVentas[ventaIndex];
+
+        // Restablecer la cantidad de productos en el inventario
+        ventaEliminada.listaDetalles.forEach(detalle => {
+            detalle.producto.cantidad += detalle.cantidad;
+        });
+
+        // Eliminar la venta de la lista de ventas
+        this.listaVentas.splice(ventaIndex, 1);
+
+        console.log(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
     }
 
 }

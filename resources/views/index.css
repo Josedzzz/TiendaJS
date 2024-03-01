@@ -347,6 +347,26 @@ body {
     width: 40px;
 }
 
+.tabla-ventas {
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-ventas th, .tabla-ventas td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-ventas th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.fila-venta:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
 /*Edicion para el formulario de carrito*/
 
 .form-carrito {

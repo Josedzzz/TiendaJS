@@ -1,4 +1,4 @@
-class Venta {
+export default class Venta {
 
     /**
      * Constructor de la clase venta.
@@ -11,14 +11,12 @@ class Venta {
      * @param {*} listaProductos 
      * @param {*} listaDetalles
      */
-    constructor(codigo, fecha, total, cliente, listaProductos, listaDetalles, carritoCompras) {
+    constructor(codigo, fecha, total, cliente, listaDetalles) {
         this.codigo = codigo;
         this.fecha = fecha;
         this.total = total;
         this.cliente = cliente;
-        this.listaProductos = listaProductos;
         this.listaDetalles = listaDetalles;
-        this.carritoCompras = carritoCompras;
     }
 
 }
