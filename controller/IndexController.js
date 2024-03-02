@@ -689,6 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //MANEJO DEL HISTORIAL ------------------------------------------------------------------------------
 
     const tablaVentasHistorial = document.getElementById('tablaVentasHistorial');
+    let ventasHistorialSeleccionada = null;
 
     //Muestra el historial de ventas de la tienda
     function mostrarVentasHistorial() {
@@ -739,6 +740,26 @@ document.addEventListener('DOMContentLoaded', function() {
         //Agregar la tabla al contenedor
         tablaVentasHistorial.appendChild(tabla);
     }
+
+    //Asociar un evento click a las filas del historial de ventas
+    tablaVentasHistorial.addEventListener('click', function(event) {
+        //Obtener la fila en la que se hizo click
+        const filaVentaHistorial = event.target.closest('tr');
+        if (!filaVentaHistorial) return;
+
+        //Elimina la clase 'seleccionado' de la fila previamente seleccionada (si existe)
+        const filaSeleccionada = tablaVentasHistorial.querySelector('.seleccionado');
+        if (filaSeleccionada) {
+            filaSeleccionada.classList.remove('seleccionado');
+        }
+
+        //Agregar la clase 'seleccionado' a la fila actual
+        filaVentaHistorial.classList.add('seleccionado');
+
+        //Actualizo la venta seleccionada
+        ventasHistorialSeleccionada = filaVentaHistorial.cells[0].textContent;
+        console.log("Venta historial seleccionada: " + ventasHistorialSeleccionada);
+    });
 
 });
 
