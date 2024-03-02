@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 mostrarFormulario(formId);
                 mostrarProductosInventario();
                 break;
+            case 'historial':
+                mostrarFormulario(formId);
             default:
                 break;
         }
@@ -683,6 +685,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
-
 
 
