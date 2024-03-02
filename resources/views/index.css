@@ -465,3 +465,23 @@ body {
 .fila-venta-historial:nth-child(even) {
     background-color: #f2f2f2;
 }
+
+.tabla-detalles {
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-detalles th, .tabla-detalles td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-detalles th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.fila-detalle:nth-child(even) {
+    background-color: #f2f2f2;
+}

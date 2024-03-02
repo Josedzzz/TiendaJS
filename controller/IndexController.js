@@ -689,6 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //MANEJO DEL HISTORIAL ------------------------------------------------------------------------------
 
     const tablaVentasHistorial = document.getElementById('tablaVentasHistorial');
+    const tablaDestallesHistorial = document.getElementById('tablaDetallesHistorial');
     let ventasHistorialSeleccionada = null;
 
     //Muestra el historial de ventas de la tienda
@@ -759,7 +760,58 @@ document.addEventListener('DOMContentLoaded', function() {
         //Actualizo la venta seleccionada
         ventasHistorialSeleccionada = filaVentaHistorial.cells[0].textContent;
         console.log("Venta historial seleccionada: " + ventasHistorialSeleccionada);
+        mostrarDetalleVenta(ventasHistorialSeleccionada);
     });
+
+    //Funcion para mostrar los detalles de venta de una venta seleccionada
+    function mostrarDetalleVenta(ventasHistorialSeleccionada) {
+        //Limpia el detalle de ventas antes de actualizarlas
+        tablaDestallesHistorial.innerHTML = '';
+
+        //Crea la tabla
+        const tabla = document.createElement('table');
+        tabla.classList.add('tabla-detalles');
+
+        //Encabezado de la lista
+        const encabezados = ["Código", "Nombre", "Cantidad", "Subtotal"];
+        const encabezadosRow = document.createElement('tr');
+        encabezados.forEach(encabezado => {
+            const th = document.createElement('th');
+            th.textContent = encabezado;
+            encabezadosRow.appendChild(th);
+        });
+        tabla.appendChild(encabezadosRow);
+
+        //Obtener la lista de detalles de la venta seleccionada
+        const listaDetalles = tienda.obtenerDetallesVenta(ventasHistorialSeleccionada);
+
+        //Add detalles a la tabla
+        listaDetalles.forEach(detalle => {
+            const fila = document.createElement('tr');
+            fila.classList.add('fila-detalle');
+
+            const codigoCell = document.createElement('td');
+            codigoCell.textContent = detalle.producto.codigo;
+            fila.appendChild(codigoCell);
+
+            const nombreCell = document.createElement('td');
+            nombreCell.textContent = detalle.producto.nombre;
+            fila.appendChild(nombreCell);
+
+            const cantidadCell = document.createElement('td');
+            cantidadCell.textContent = detalle.cantidad;
+            fila.appendChild(cantidadCell);
+
+            const subtotalCell = document.createElement('td');
+            subtotalCell.textContent = detalle.subtotal;
+            fila.appendChild(subtotalCell);
+
+            tabla.appendChild(fila);
+        });
+
+        //Agregar la tabla al contenedor
+        tablaDestallesHistorial.appendChild(tabla);
+    }
 
 });
 

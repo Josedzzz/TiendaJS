@@ -365,7 +365,6 @@ export default class Tienda {
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
 
-    
     /**
      * Obtiene los productos (hashMap) y los convierte a una lista que ordena dependiendo de la cantidad
      * @returns 
@@ -376,6 +375,22 @@ export default class Tienda {
             return productoA.cantidad - productoB.cantidad;
         });
         return productosArray;
+    }
+
+    //MANEJO DE HISTORIAL -------------------------------------------------------------------------------
+
+    /**
+     * Obtiene los detalles de venta de una venta en concreto
+     * @param {*} venta 
+     * @returns 
+     */
+    obtenerDetallesVenta(ventaCodigo) {
+        const ventaEncontrada = this.listaVentas.find(venta => venta.codigo === ventaCodigo);
+        if (ventaEncontrada) {
+            return ventaEncontrada.listaDetalles;
+        } else {
+            return [];
+        }
     }
 
 }
