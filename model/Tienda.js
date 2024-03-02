@@ -2,6 +2,7 @@ import Cliente from './Cliente.js'
 import Producto from './Producto.js';
 import Venta from './Venta.js';
 import DetalleVenta from './DetalleVenta.js';
+import LinkedList from './LinkedList.js';
 
 export default class Tienda {
 
@@ -23,6 +24,7 @@ export default class Tienda {
         this.hashMapProductos = new Map(); //Se inicializa un hashMap con new Map().  Se puede usar un objeto {} Pero Map es mas eficiente.
         this.hashMapClientes = new Map(); 
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
+        this.historialVentas = new LinkedList();
     }
 
     getClientes() {
@@ -319,6 +321,9 @@ export default class Tienda {
         // Agregar la venta a la lista de ventas de la tienda
         this.listaVentas.push(venta);
 
+        //Agrega la venta a la linkedList (Esta la ordena sola)
+        this.historialVentas.insertInOrder(venta);
+
         // Actualizar la cantidad de productos en el inventario
         for (const [producto, cantidad] of carritoCompras) {
             producto.cantidad -= cantidad;
@@ -337,7 +342,7 @@ export default class Tienda {
         // Buscar la venta en la lista de ventas
         const ventaIndex = this.listaVentas.findIndex(venta => venta.codigo === codigoVenta);
         if (ventaIndex === -1) {
-            console.log(`No se encontró ninguna venta con el código ${codigoVenta}.`);
+            alert(`No se encontró ninguna venta con el código ${codigoVenta}.`);
             return;
         }
 
@@ -352,7 +357,10 @@ export default class Tienda {
         // Eliminar la venta de la lista de ventas
         this.listaVentas.splice(ventaIndex, 1);
 
-        console.log(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
+        // Eliminar la venta de la linkedList de historial de ventas
+        this.historialVentas.deleteVenta(codigoVenta);
+
+        alert(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
