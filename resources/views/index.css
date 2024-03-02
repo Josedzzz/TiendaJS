@@ -443,3 +443,25 @@ body {
 .fila-producto-inventario:nth-child(even) {
     background-color: #f2f2f2;
 }
+
+/*Edicion para el historial de la tienda*/
+
+.tabla-ventas-historial {
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-ventas-historial th, .tabla-ventas-historial td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-ventas-historial th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.fila-venta-historial:nth-child(even) {
+    background-color: #f2f2f2;
+}

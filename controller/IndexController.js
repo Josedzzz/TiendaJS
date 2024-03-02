@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'historial':
                 mostrarFormulario(formId);
+                mostrarVentasHistorial();
             default:
                 break;
         }
@@ -635,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const tablaProductosInventario = document.getElementById('tablaProductosInventario');
 
+    //Muestra los productos del inventario de la tienda
     function mostrarProductosInventario() {
         //Limpia la tabla de productos antes de actualizarla
         tablaProductosInventario.innerHTML = '';
@@ -682,6 +684,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Agregar la tabla al contenedor
         tablaProductosInventario.appendChild(tabla);
+    }
+
+    //MANEJO DEL HISTORIAL ------------------------------------------------------------------------------
+
+    const tablaVentasHistorial = document.getElementById('tablaVentasHistorial');
+
+    //Muestra el historial de ventas de la tienda
+    function mostrarVentasHistorial() {
+        //Limpia la tabla de productos antes de actualizarla
+        tablaVentasHistorial.innerHTML = '';
+
+        //Crea la tabla
+        const tabla = document.createElement('table');
+        tabla.classList.add('tabla-ventas-historial');
+
+        //Encabezado de la lista
+        const encabezados = ["Código", "Fecha", "Total", "Cliente"];
+        const encabezadosRow = document.createElement('tr');
+        encabezados.forEach(encabezado => {
+            const th = document.createElement('th');
+            th.textContent = encabezado;
+            encabezadosRow.appendChild(th);
+        });
+        tabla.appendChild(encabezadosRow);
+
+        //Obtener la linkedList ya ordenada de la tienda
+        const ventasHistorialArray = tienda.historialVentas.getSalesHistory();
+
+        //Filas de productos 
+        ventasHistorialArray.forEach(venta => {
+            const fila = document.createElement('tr');
+            fila.classList.add('fila-venta-historial');
+
+            const codigoCell = document.createElement('td');
+            codigoCell.textContent = venta.codigo;
+            fila.appendChild(codigoCell);
+
+            const fechaCell = document.createElement('td');
+            fechaCell.textContent = venta.fecha;
+            fila.appendChild(fechaCell);
+
+            const totalCell = document.createElement('td');
+            totalCell.textContent = venta.total;
+            fila.appendChild(totalCell);
+
+            const idClienteCell = document.createElement('td');
+            idClienteCell.textContent = venta.cliente.identificacion;
+            fila.appendChild(idClienteCell);
+
+            tabla.appendChild(fila);
+        });
+
+        //Agregar la tabla al contenedor
+        tablaVentasHistorial.appendChild(tabla);
     }
 
 });
