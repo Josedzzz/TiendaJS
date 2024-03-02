@@ -421,3 +421,25 @@ body {
 .fila-producto-carrito:nth-child(even) {
     background-color: #f2f2f2;
 }
+
+/*Edicion para el inventario de la tienda*/
+
+.tabla-productos-inventario {
+    font-size: 14px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.tabla-productos-inventario th, .tabla-productos-inventario td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tabla-productos-inventario th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+.fila-producto-inventario:nth-child(even) {
+    background-color: #f2f2f2;
+}

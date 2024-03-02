@@ -5,6 +5,68 @@ document.addEventListener('DOMContentLoaded', function() {
     const tienda = new Tienda("TiendaJS", "Quimbaya");
     tienda.test();
 
+    //MANEJO DE LOS LINKS DE LA TIENDA ---------------------------------------------------------------
+
+    const handleLinkClick = (event) => {
+        event.preventDefault();
+        const link = event.target;
+        const formId = link.getAttribute("data-form-id");
+
+        // Mostrar el formulario correspondiente y ocultar los demás
+        const forms = document.querySelectorAll(".form-container");
+        forms.forEach(form => {
+            if (form.id === formId) {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        });
+
+        // Ejecutar acciones específicas dependiendo del formulario
+        switch (formId) {
+            case 'clientesForm':
+                mostrarFormulario(formId);
+                mostrarClientes();
+                break;
+            case 'productosForm':
+                mostrarFormulario(formId);
+                mostrarProductos();
+                break;
+            case 'gestionarCarrito':
+                mostrarFormulario(formId);
+                const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
+                mostrarProductosCarrito(identificacionCliente);
+                break;
+            case 'realizarVenta':
+                mostrarFormulario(formId);
+                mostrarVentas();
+                break;
+            case 'inventario':
+                mostrarFormulario(formId);
+                mostrarProductosInventario();
+                break;
+            default:
+                break;
+        }
+    };
+
+    const mostrarFormulario = (formId) => {
+        //Muestra el formulario
+        const form = document.getElementById(formId);
+        form.style.display = "block";
+        //Oculta el resto de formularios
+        const otherForms = document.querySelectorAll(".form-container:not(#" + formId + ")");
+        for (const otherForm of otherForms) {
+            otherForm.style.display = "none";
+        }
+    };
+
+    // Asociar la funcion handleLinkClick al evento click de todos los elementos de la clase "links"
+    const links = document.querySelectorAll(".links a");
+    links.forEach(link => {
+        link.addEventListener("click", handleLinkClick);
+    });
+    
     //MANEJO DE LA VENTANA DE CLIENTES ---------------------------------------------------------------
 
     //Variables auxiliares para la ventana
@@ -316,7 +378,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let productoCarritoSeleccionado = null;
 
     //Funcion para mostrar los productos actuales en el carrito del cliente
-    function mostrarProductosCarrito() {
+    function mostrarProductosCarrito(identificacionCliente) {
+        if (identificacionCliente === null) {
+            alert('El identificador del cliente es nulo');
+            return;
+        }
         //Limpia el carrito antes de actualizarlo
         tablaProductosCarrito.innerHTML = '';
 
@@ -335,8 +401,10 @@ document.addEventListener('DOMContentLoaded', function() {
         tabla.appendChild(encabezadosRow);
 
         //Obtener el hashMap de carrito de un cliente
-        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value; 
         const carritoCompras = tienda.getCarritoComprasCliente(identificacionCliente);
+        if (carritoCompras === null) {
+            return;
+        }
         
         //Add productos a la tabla con sus cantidades
         carritoCompras.forEach((cantidad, producto) => {
@@ -406,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto) {
         tienda.agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto);
         //Actualizo la tabla del carrito
-        mostrarProductosCarrito();
+        mostrarProductosCarrito(idCliente);
     }
 
     //Asociar un evento al boton de eliminar producto del carrito
@@ -429,13 +497,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function eliminarProductoCarrito(idCliente, codigoProducto) {
         tienda.eliminarProductoCarrito(idCliente, codigoProducto);
         //Actualizo la tabla
-        mostrarProductosCarrito();
+        mostrarProductosCarrito(idCliente);
     }
 
     //Asocia un evento al boton de mostrar el carrito de un cliente
     btnMostrarCarritoCliente.addEventListener('click', function(event) {
         event.preventDefault();
-        mostrarProductosCarrito();
+        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value; 
+        mostrarProductosCarrito(identificacionCliente);
     });
 
     //MANEJO DE LA VENTANA DE VENTA -----------------------------------------------------------------------
@@ -560,6 +629,59 @@ document.addEventListener('DOMContentLoaded', function() {
         mostrarVentas();
     }
 
+    //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
+
+    const tablaProductosInventario = document.getElementById('tablaProductosInventario');
+
+    function mostrarProductosInventario() {
+        //Limpia la tabla de productos antes de actualizarla
+        tablaProductosInventario.innerHTML = '';
+
+        //Crea la tabla
+        const tabla = document.createElement('table');
+        tabla.classList.add('tabla-productos-inventario');
+
+        //Encabezado de la tabla
+        const encabezados = ['Nombre', 'Código', 'Precio', 'Cantidad'];
+        const encabezadosRow = document.createElement('tr');
+        encabezados.forEach(encabezado => {
+            const th = document.createElement('th');
+            th.textContent = encabezado;
+            encabezadosRow.appendChild(th);
+        });
+        tabla.appendChild(encabezadosRow);
+
+        //Obtener el array ordenado del inventario de la tienda
+        const productosArray = tienda.obtenerProductosInventario();
+
+        //Filas de productos
+        productosArray.forEach(producto => {
+            const fila = document.createElement('tr');
+            fila.classList.add('fila-producto-inventario');
+
+            const nombreCell = document.createElement('td');
+            nombreCell.textContent = producto.nombre;
+            fila.appendChild(nombreCell);
+
+            const codigoCell = document.createElement('td');
+            codigoCell.textContent = producto.codigo;
+            fila.appendChild(codigoCell);
+
+            const precioCell = document.createElement('td');
+            precioCell.textContent = producto.precio;
+            fila.appendChild(precioCell);
+
+            const cantidadCell = document.createElement('td');
+            cantidadCell.textContent = producto.cantidad;
+            fila.appendChild(cantidadCell);
+
+            tabla.appendChild(fila);
+        });
+
+        //Agregar la tabla al contenedor
+        tablaProductosInventario.appendChild(tabla);
+    }
+
 });
 
 //Manejo de los links de la app para el cambio de contenido
@@ -568,18 +690,18 @@ document.addEventListener('DOMContentLoaded', function() {
  * Controla el click que hace el usuario
  * @param {*} event representa el evento click cuando el usuario hace click en el enlace 
  */
-const handleLinkClick = (event) => {
+/*const handleLinkClick = (event) => {
   	const link = event.target;
   	//Id del formulario que se va a mostrar
   	const formId = link.getAttribute("data-form-id"); 
   	mostrarFormulario(formId);
-}
+}*/
 
 /**
  * Muestra el formulario al que se le da click desde el header
  * @param {*} formId 
  */
-const mostrarFormulario = (formId) => {
+/*const mostrarFormulario = (formId) => {
     //Muestra el formulario
     const form = document.getElementById(formId);
     form.style.display = "block";
@@ -588,11 +710,11 @@ const mostrarFormulario = (formId) => {
     for (const otherForm of otherForms) {
         otherForm.style.display = "none";
     }
-};
+};*/
 
 //Asociar la funcion handleLinkClick al evento click de todos los elementos de la clase "links"
-const links = document.querySelectorAll(".links a");
+/*const links = document.querySelectorAll(".links a");
 for (const link of links) {
   	link.addEventListener("click", handleLinkClick);
-}
+}*/
 

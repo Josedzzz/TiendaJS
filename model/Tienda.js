@@ -355,5 +355,20 @@ export default class Tienda {
         console.log(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
     }
 
+    //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
+
+    
+    /**
+     * Obtiene los productos (hashMap) y los convierte a una lista que ordena dependiendo de la cantidad
+     * @returns 
+     */
+    obtenerProductosInventario() {
+        const productosArray = Array.from(this.hashMapProductos.values());
+        productosArray.sort((productoA, productoB) => {
+            return productoA.cantidad - productoB.cantidad;
+        });
+        return productosArray;
+    }
+
 }
 
