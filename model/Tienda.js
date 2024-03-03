@@ -3,6 +3,12 @@ import Producto from './Producto.js';
 import Venta from './Venta.js';
 import DetalleVenta from './DetalleVenta.js';
 import LinkedList from './LinkedList.js';
+import { ErrorDeValidacion } from './utils/Excepciones.js';
+import { logError, logExito } from './utils/logger.js';
+import { mostrarPopupError } from './utils/sweetAlert.js';
+
+
+
 
 export default class Tienda {
 
@@ -22,7 +28,7 @@ export default class Tienda {
         this.nombre = nombre;
         this.direccion = direccion;
         this.hashMapProductos = new Map(); //Se inicializa un hashMap con new Map().  Se puede usar un objeto {} Pero Map es mas eficiente.
-        this.hashMapClientes = new Map(); 
+        this.hashMapClientes = new Map();
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
         this.historialVentas = new LinkedList();
     }
@@ -48,32 +54,35 @@ export default class Tienda {
         alert('hello world');
     }
 
-    /* Registra un cliente siempre y cuando su id no exista
+    /* Registra un cliente siempre verificando que la identificación no exista en el hashMap de clientes.
+    Retorna true si se pudo registrar el cliente, false en caso contrario. 
+    Creo que la sintáxis de la función puede mejorar pero me adapté a la forma en que se estaba haciendo :skull:- Daniel.
     * @param {*} identificacion 
     * @param {*} nombre 
     * @param {*} direccion 
     */
     registrarCliente(identificacion, nombre, direccion) {
-        if (this.isCamposValidosCliente(identificacion, nombre, direccion)) {
-            if (this.hashMapClientes.has(identificacion)) {
-                alert("El cliente con identificacion " + identificacion + " ya está registrado")
-            } else {
+
+        try {
+            if (this.isCamposValidosCliente(identificacion, nombre, direccion)===true || !this.hashMapClientes.has(identificacion)) {
+
+                logExito("Registro Cliente: Campos validos y no existe el cliente.")
                 const cliente = new Cliente(identificacion, nombre, direccion);
-                this.hashMapClientes.set(identificacion, cliente); 
-                alert("Cliente registrado con éxito");
-                //Imprimir el hashMap de clientes para verificar si se registro correctamente
-                console.log("Se registró el cliente:");
+                this.hashMapClientes.set(identificacion, cliente);
                 this.imprimirClientes();
-            }        
-        } else {
-            alert("Por favor asegurese de que los campos de cliente esten llenos");
+            } 
+            return true;
+        } catch (error) {
+            logError(error.message);
+            mostrarPopupError(error.message);
+            return false;
         }
     }
 
-   /**
-    * Elimina un cliente del hashMap de clientes dado su id
-    * @param {*} idCliente 
-    */
+    /**
+     * Elimina un cliente del hashMap de clientes dado su id
+     * @param {*} idCliente 
+     */
     eliminarCliente(idCliente) {
         // Verifica si el cliente existe en el Map
         if (this.hashMapClientes.has(idCliente)) {
@@ -107,23 +116,37 @@ export default class Tienda {
     }
 
     /**
-     * Verifica que los campos para la manipulacion de clientes no esten vacios
+     * Verifica que los campos para la manipulacion de clientes no estén vacios
      * @param {*} identificacion 
      * @param {*} nombre 
      * @param {*} direccion 
      * @returns 
      */
     isCamposValidosCliente(identificacion, nombre, direccion) {
-        if (!identificacion || !nombre || !direccion) {
-            return false;
-        } else {
-            return true;
-        } 
+
+        let flag = true;
+        if(this.hashMapClientes.has(identificacion)){
+            flag = false;
+            throw new ErrorDeValidacion('El cliente ya está registrado en la tienda.');
+        }
+        if (typeof +identificacion !== 'number' || identificacion < 0 || identificacion.trim() === '') {
+            flag = false;
+            throw new ErrorDeValidacion('La identificación debe ser un número entero positivo.');
+        }
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            flag = false;
+            throw new ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof direccion !== 'string' || direccion.trim() === '') {
+            flag = false
+            throw new ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
+        }
+        return flag;
     }
 
-   /**
-    * Imprime el hashMap de clientes
-    */
+    /**
+     * Imprime el hashMap de clientes
+     */
     imprimirClientes() {
         this.hashMapClientes.forEach((cliente) => {
             console.log(cliente.toString());
@@ -166,7 +189,8 @@ export default class Tienda {
             this.imprimirProductos();
             alert(`Producto con código ${codigoProducto} eliminado.`);
         } else {
-            alert(`Producto con código ${codigoProducto} no existe.`);
+            //alert(`Producto con código ${codigoProducto} no existe.`);
+            throw new Error(`Producto con código ${codigoProducto} no existe.`);
         }
     }
 
@@ -365,7 +389,7 @@ export default class Tienda {
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
 
-    
+
     /**
      * Obtiene los productos (hashMap) y los convierte a una lista que ordena dependiendo de la cantidad
      * @returns 

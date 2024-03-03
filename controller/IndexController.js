@@ -1,4 +1,5 @@
 import Tienda from "../model/Tienda.js";
+import { mostrarPopupExito } from "../model/utils/sweetAlert.js";
 
 document.addEventListener('DOMContentLoaded', function() {
     // Crear una instancia de la clase Tienda
@@ -153,21 +154,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const identificacion = document.getElementById('identificacion').value;
         const nombre = document.getElementById('nombre').value;
         const direccion = document.getElementById('direccion').value;
-        registrarCliente(identificacion, nombre, direccion);
-        //Limpiar los campos del formulario (opcional)
-        formCliente.reset();
+        let registroExitoso = registrarCliente(identificacion, nombre, direccion) ? 1 : 0;
+
+        //Limpiar los campos del formulario si hubo un registro exitoso(opcional)
+        if(registroExitoso === 1) {
+            formCliente.reset();
+            mostrarPopupExito('Cliente registrado exitosamente.');
+        }
     });
     
     /**
-     * Llama a la tienda para registrar un cliente
+     * Llama a la tienda para registrar un cliente y asigna una variable bandera para verificar si se registro correctamente.
      * @param {*} identificacion 
      * @param {*} nombre 
      * @param {*} direccion 
      */
     function registrarCliente(identificacion, nombre, direccion) {
-        tienda.registrarCliente(identificacion, nombre, direccion);
+        let flag = tienda.registrarCliente(identificacion, nombre, direccion);
         //Actualizo la tabla
         mostrarClientes();
+        return flag;
     }
 
     //Asociar un evento al boton de eliminar cliente

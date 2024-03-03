@@ -1,0 +1,12 @@
+        if (this.isCamposValidosCliente(identificacion, nombre, direccion)) {
+            if (this.hashMapClientes.has(identificacion)) {
+                alert("El cliente con identificacion " + identificacion + " ya está registrado")
+            } else {
+                const cliente = new Cliente(identificacion, nombre, direccion);
+                this.hashMapClientes.set(identificacion, cliente);
+                alert("Cliente registrado con éxito");
+                //Imprimir el hashMap de clientes para verificar si se registro correctamente
+                console.log("Se registró el cliente:");
+                this.imprimirClientes();
+            }
+        }
