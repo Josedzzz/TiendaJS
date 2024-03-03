@@ -16,3 +16,12 @@ export function mostrarPopupExito(mensaje) {
         confirmButtonText: 'Entendido'
     });
 }
+
+export function mostartPopupPrecaucion(mensaje) {
+    Swal.fire({
+        title: 'Precaución',
+        text: mensaje,
+        icon: 'warning',
+        confirmButtonText: 'Entendido'
+    });
+}

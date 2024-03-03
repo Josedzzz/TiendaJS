@@ -3,9 +3,8 @@ import Producto from './Producto.js';
 import Venta from './Venta.js';
 import DetalleVenta from './DetalleVenta.js';
 import LinkedList from './LinkedList.js';
-import { ErrorDeValidacion } from './utils/Excepciones.js';
+import * as Excepciones from './utils/Excepciones.js';
 import { logError, logExito } from './utils/logger.js';
-import { mostrarPopupError } from './utils/sweetAlert.js';
 
 
 
@@ -64,18 +63,17 @@ export default class Tienda {
     registrarCliente(identificacion, nombre, direccion) {
 
         try {
-            if (this.isCamposValidosCliente(identificacion, nombre, direccion)===true || !this.hashMapClientes.has(identificacion)) {
+            if (this.isCamposValidosCliente(identificacion, nombre, direccion) === true || !this.hashMapClientes.has(identificacion)) {
 
                 logExito("Registro Cliente: Campos validos y no existe el cliente.")
                 const cliente = new Cliente(identificacion, nombre, direccion);
                 this.hashMapClientes.set(identificacion, cliente);
                 this.imprimirClientes();
-            } 
-            return true;
+            }
+            return 'exito';
         } catch (error) {
             logError(error.message);
-            mostrarPopupError(error.message);
-            return false;
+            return error.message;
         }
     }
 
@@ -84,13 +82,14 @@ export default class Tienda {
      * @param {*} idCliente 
      */
     eliminarCliente(idCliente) {
-        // Verifica si el cliente existe en el Map
+        // Verifica si el cliente existe en el Map. 
+        //No es necesario verificar si existe o no ya que hay que elegirlo para eliminarlo, de todas maneras se deja - Daniel.
         if (this.hashMapClientes.has(idCliente)) {
             this.hashMapClientes.delete(idCliente);
             this.imprimirClientes();
-            alert(`Cliente con identificación ${idCliente} eliminado.`);
+            return 'exito'
         } else {
-            alert(`El cliente con identificación ${idCliente} no existe.`);
+            throw new Excepciones.EstadoCliente(`El cliente con identificación ${idCliente} no existe.`);
         }
     }
 
@@ -125,21 +124,21 @@ export default class Tienda {
     isCamposValidosCliente(identificacion, nombre, direccion) {
 
         let flag = true;
-        if(this.hashMapClientes.has(identificacion)){
+        if (this.hashMapClientes.has(identificacion)) {
             flag = false;
-            throw new ErrorDeValidacion('El cliente ya está registrado en la tienda.');
+            throw new Excepciones.ErrorDeValidacion('El cliente ya está registrado en la tienda.');
         }
         if (typeof +identificacion !== 'number' || identificacion < 0 || identificacion.trim() === '') {
             flag = false;
-            throw new ErrorDeValidacion('La identificación debe ser un número entero positivo.');
+            throw new Excepciones.ErrorDeValidacion('La identificación debe ser un número entero positivo.');
         }
         if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
             flag = false;
-            throw new ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
         }
         if (typeof direccion !== 'string' || direccion.trim() === '') {
             flag = false
-            throw new ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
+            throw new Excepciones.ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
         }
         return flag;
     }

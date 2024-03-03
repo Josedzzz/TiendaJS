@@ -1,7 +1,7 @@
 import Tienda from "../model/Tienda.js";
-import { mostrarPopupExito } from "../model/utils/sweetAlert.js";
+import * as sweetAlert from "../model/utils/sweetAlert.js";
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Crear una instancia de la clase Tienda
     const tienda = new Tienda("TiendaJS", "Quimbaya");
     tienda.test();
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     links.forEach(link => {
         link.addEventListener("click", handleLinkClick);
     });
-    
+
     //MANEJO DE LA VENTANA DE CLIENTES ---------------------------------------------------------------
 
     //Variables auxiliares para la ventana
@@ -78,18 +78,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRegistrarCliente = document.getElementById('subir');
     const btnEliminarCliente = document.getElementById('btnEliminarCliente');
     const btnActualizarCliente = document.getElementById('btnActualizarCliente');
-    const tablaClientes = document.getElementById('tablaClientes');    
+    const tablaClientes = document.getElementById('tablaClientes');
     let clienteSeleccionado = null;
 
     //Funcion para mostrar los clientes actuales de la tienda
     function mostrarClientes() {
         // Limpia la tabla antes de actualizarla
         tablaClientes.innerHTML = '';
-    
+
         // Crear la tabla
         const tabla = document.createElement('table');
         tabla.classList.add('tabla-clientes');
-    
+
         // Encabezado de la tabla
         const encabezados = ['Identificación', 'Nombre', 'Dirección'];
         const encabezadosRow = document.createElement('tr');
@@ -99,37 +99,37 @@ document.addEventListener('DOMContentLoaded', function() {
             encabezadosRow.appendChild(th);
         });
         tabla.appendChild(encabezadosRow);
-    
+
         // Obtener el HashMap de clientes y convertirlo en un array
         const hashMapClientes = tienda.getClientes();
         const clientesArray = Array.from(hashMapClientes.values());
-    
+
         // Filas de clientes
         clientesArray.forEach(cliente => {
             const fila = document.createElement('tr');
             fila.classList.add('fila-cliente'); // Agregar clase para la fila
-    
+
             const identificacionCell = document.createElement('td');
             identificacionCell.textContent = cliente.identificacion;
             fila.appendChild(identificacionCell);
-    
+
             const nombreCell = document.createElement('td');
             nombreCell.textContent = cliente.nombre;
             fila.appendChild(nombreCell);
-    
+
             const direccionCell = document.createElement('td');
             direccionCell.textContent = cliente.direccion;
             fila.appendChild(direccionCell);
-    
+
             tabla.appendChild(fila);
         });
-    
+
         // Agregar la tabla al contenedor
         tablaClientes.appendChild(tabla);
     }
 
     // Asociar un evento de clic a las filas de la tabla de clientes
-    tablaClientes.addEventListener('click', function(event) {
+    tablaClientes.addEventListener('click', function (event) {
         // Obtener la fila en la que se hizo clic
         const filaCliente = event.target.closest('tr');
         if (!filaCliente) return; // Salir si no se hizo clic en una fila
@@ -146,23 +146,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Actualizo clienteSeleccionado
         clienteSeleccionado = filaCliente.cells[0].textContent;
     });
-    
+
 
     //Agregar un evento de click al boton de registrar cliente
-    btnRegistrarCliente.addEventListener('click', function(event) {
-        event.preventDefault(); 
+    btnRegistrarCliente.addEventListener('click', function (event) {
+        event.preventDefault();
         const identificacion = document.getElementById('identificacion').value;
         const nombre = document.getElementById('nombre').value;
         const direccion = document.getElementById('direccion').value;
-        let registroExitoso = registrarCliente(identificacion, nombre, direccion) ? 1 : 0;
+        let resultadoRegistro = registrarCliente(identificacion, nombre, direccion);
 
-        //Limpiar los campos del formulario si hubo un registro exitoso(opcional)
-        if(registroExitoso === 1) {
+        //Limpiar los campos del formulario si hubo un registro exitoso. 
+        if (resultadoRegistro === 'exito') {
+            sweetAlert.mostrarPopupExito('Cliente registrado exitosamente.');
             formCliente.reset();
-            mostrarPopupExito('Cliente registrado exitosamente.');
+        } else {
+            sweetAlert.mostrarPopupError(resultadoRegistro)
         }
     });
-    
+
     /**
      * Llama a la tienda para registrar un cliente y asigna una variable bandera para verificar si se registro correctamente.
      * @param {*} identificacion 
@@ -171,20 +173,26 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function registrarCliente(identificacion, nombre, direccion) {
         let flag = tienda.registrarCliente(identificacion, nombre, direccion);
-        //Actualizo la tabla
+        //Actualizo la tabla.
         mostrarClientes();
         return flag;
     }
 
     //Asociar un evento al boton de eliminar cliente
-    btnEliminarCliente.addEventListener('click', function() {
+    btnEliminarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
-            alert('Por favor selecciona un cliente en la tabla.');
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un cliente en la tabla.');
             return;
         }
         const idCliente = clienteSeleccionado;
-        eliminarCliente(idCliente);
-        clienteSeleccionado = null;
+        let resultadoEliminacion = eliminarCliente(idCliente);
+        if (resultadoEliminacion === 'exito') {
+            sweetAlert.mostrarPopupExito('Cliente eliminado exitosamente.');
+            clienteSeleccionado = null;
+        } else {
+            //Mostrar un mensaje de error. No llega acá por el simple hecho de que el cliente seleccionado no puede ser nulo.
+            sweetAlert.mostrarPopupError(resultadoEliminacion);
+        }
     });
 
     /**
@@ -192,13 +200,14 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} idCliente 
      */
     function eliminarCliente(idCliente) {
-        tienda.eliminarCliente(idCliente);
+        let resultadoEliminacion = tienda.eliminarCliente(idCliente);
         //Actualizo la tabla
         mostrarClientes();
+        return resultadoEliminacion;
     }
 
     //Se asocia un evento al boton de actualizar cliente
-    btnActualizarCliente.addEventListener('click', function() {
+    btnActualizarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
             alert('Por favor seleccione un cliente en la tabla.');
             return;
@@ -284,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento click a las filas de la tabla de productos
-    tablaProductos.addEventListener('click', function(event) {
+    tablaProductos.addEventListener('click', function (event) {
         //Obtener la fila en la que se hizo click
         const filaProducto = event.target.closest('tr');
         if (!filaProducto) return; //Salir si no se hizo click
@@ -304,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     //Agregar un evento de click al boton de registrarProducto
-    btnRegistrarProducto.addEventListener('click', function(event) {
+    btnRegistrarProducto.addEventListener('click', function (event) {
         event.preventDefault();
         const nombreProducto = document.getElementById('nombre-producto').value;
         const codigoProducto = document.getElementById('codigo-producto').value;
@@ -329,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento al boton de eliminar producto
-    btnEliminarProducto.addEventListener('click', function() {
+    btnEliminarProducto.addEventListener('click', function () {
         if (!productoSeleccionado) {
             alert("Por favor seleccione un producto en la tabla.");
             return;
@@ -350,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento al boton de de actualizar producto
-    btnActualizarProducto.addEventListener('click', function() {
+    btnActualizarProducto.addEventListener('click', function () {
         if (!productoSeleccionado) {
             alert("Por favor seleccione un producto en la tabla.");
             return;
@@ -414,28 +423,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (carritoCompras === null) {
             return;
         }
-        
+
         //Add productos a la tabla con sus cantidades
         carritoCompras.forEach((cantidad, producto) => {
             const fila = document.createElement('tr');
             fila.classList.add('fila-producto-carrito');
-        
+
             const codigoCell = document.createElement('td');
             codigoCell.textContent = producto.codigo;
             fila.appendChild(codigoCell);
-        
+
             const nombreCell = document.createElement('td');
             nombreCell.textContent = producto.nombre;
             fila.appendChild(nombreCell);
-        
+
             const precioCell = document.createElement('td');
             precioCell.textContent = producto.precio;
             fila.appendChild(precioCell);
-        
+
             const cantidadCell = document.createElement('td');
             cantidadCell.textContent = cantidad;
             fila.appendChild(cantidadCell);
-        
+
             tabla.appendChild(fila);
         });
 
@@ -444,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento click a las filas de la tabla de productos
-    tablaProductosCarrito.addEventListener('click', function(event) {
+    tablaProductosCarrito.addEventListener('click', function (event) {
         //Obtener la fila en la que se hizo click
         const filaProducto = event.target.closest('tr');
         if (!filaProducto) return;
@@ -463,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     //Agregar un evento de click al boton de agregarProducto
-    btnAgregarProductoCarrito.addEventListener('click', function(event) {
+    btnAgregarProductoCarrito.addEventListener('click', function (event) {
         event.preventDefault();
         const idCliente = document.getElementById('identificacion-cliente-carrito').value;
         const codigoProducto = document.getElementById('codigo-producto-carrito').value;
@@ -487,12 +496,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento al boton de eliminar producto del carrito
-    btnEliminarProductoCarrito.addEventListener('click', function() {
+    btnEliminarProductoCarrito.addEventListener('click', function () {
         if (!productoCarritoSeleccionado) {
             alert("Por favor seleccione un producto en la tabla.");
             return;
         }
-        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value; 
+        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
         const codigoProducto = productoCarritoSeleccionado;
         eliminarProductoCarrito(identificacionCliente, codigoProducto);
         productoCarritoSeleccionado = null;
@@ -510,9 +519,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asocia un evento al boton de mostrar el carrito de un cliente
-    btnMostrarCarritoCliente.addEventListener('click', function(event) {
+    btnMostrarCarritoCliente.addEventListener('click', function (event) {
         event.preventDefault();
-        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value; 
+        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
         mostrarProductosCarrito(identificacionCliente);
     });
 
@@ -532,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
         //Crea la tabla
         const tabla = document.createElement('table');
         tabla.classList.add('tabla-ventas');
-        
+
         //Encabezado de la lista
         const encabezados = ["Código", "Fecha", "Total", "Cliente"];
         const encabezadosRow = document.createElement('tr');
@@ -575,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento click a las filas de la tabla de ventas
-    tablaVentas.addEventListener('click', function(event) {
+    tablaVentas.addEventListener('click', function (event) {
         //Obtener la fila en la que se hizo click
         const filaVenta = event.target.closest('tr');
         if (!filaVenta) return;
@@ -588,21 +597,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Agregar la clase 'seleccionado' a la fila actual
         filaVenta.classList.add('seleccionado');
-        
+
         //Actualizo la venta seleccionada
         ventaSeleccionada = filaVenta.cells[0].textContent;
         console.log("Venta seleccionada " + ventaSeleccionada);
     });
 
     //Agregar un evento de click al boton de registrar venta
-    btnAgregarVenta.addEventListener('click', function(event) {
+    btnAgregarVenta.addEventListener('click', function (event) {
         event.preventDefault();
         const codigoVenta = document.getElementById('codigo-venta').value;
         const idClienteVenta = document.getElementById('cliente-venta').value;
         const fechaVenta = document.getElementById('fecha-venta').value;
         registrarVenta(codigoVenta, idClienteVenta, fechaVenta);
         //Limpia los campos del formulario
-        formVenta.reset();  
+        formVenta.reset();
     });
 
     /**
@@ -618,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Agrega un evento de click al boton de eliminar venta
-    btnEliminarVenta.addEventListener('click', function() {
+    btnEliminarVenta.addEventListener('click', function () {
         if (!ventaSeleccionada) {
             alert("Por favor seleccione una venta en la tabla.");
             return;
