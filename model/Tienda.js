@@ -30,6 +30,7 @@ export default class Tienda {
         this.deserializarClientes(localStorage.getItem('clientes')); 
         this.deserializarProductos(localStorage.getItem('productos'));
         this.deserializarVentas(localStorage.getItem('ventas'));
+        this.deserializarHistorialVentas(localStorage.getItem('historial'));
     }
 
     getClientes() {
@@ -103,6 +104,28 @@ export default class Tienda {
     deserializarVentas(jsonVentas) {
         if (jsonVentas) {
             this.listaVentas = JSON.parse(jsonVentas);
+        }
+    }
+
+    /**
+     * Funcion para serializar el historial de ventas en formato JSON
+     * @returns 
+     */
+    serializarHistorialVentas() {
+        const historialArray = this.historialVentas.getSalesHistory();
+        return JSON.stringify(historialArray);
+    }
+
+    /**
+     * Funcion para deserializar el historial de ventas a partir de un JSON y cargarlos en la linkedlist
+     * @param {*} jsonHistorial 
+     */
+    deserializarHistorialVentas(jsonHistorial) {
+        if (jsonHistorial) {
+            const historialArray = JSON.parse(jsonHistorial);
+            historialArray.forEach(venta => {
+                this.historialVentas.insertInOrder(venta);
+            });
         }
     }
 
@@ -423,6 +446,9 @@ export default class Tienda {
         //Serializo los productos
         const productiosSerializados = this.serializarProductos();
         localStorage.setItem('productos', productiosSerializados);
+        //Serializo el historial
+        const historialSerializados = this.serializarHistorialVentas();
+        localStorage.setItem('historial', historialSerializados);
     }
 
     /**
@@ -460,6 +486,9 @@ export default class Tienda {
         //Serializo los productos
         const productiosSerializados = this.serializarProductos();
         localStorage.setItem('productos', productiosSerializados);
+        //Serializo el historial
+        const historialSerializados = this.serializarHistorialVentas();
+        localStorage.setItem('historial', historialSerializados);
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
