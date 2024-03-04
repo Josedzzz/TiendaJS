@@ -56,9 +56,11 @@ export default class Tienda {
      * @param {*} jsonClientes 
      */
     deserializarClientes(jsonClientes) {
-        const clientesArray = JSON.parse(jsonClientes);
-        for (const cliente of clientesArray) {
-            this.hashMapClientes.set(cliente.identificacion, new Cliente(cliente.identificacion, cliente.nombre, cliente.direccion));
+        if (jsonClientes) {
+            const clientesArray = JSON.parse(jsonClientes);
+            for (const cliente of clientesArray) {
+                this.hashMapClientes.set(cliente.identificacion, new Cliente(cliente.identificacion, cliente.nombre, cliente.direccion));
+            }
         }
     }
 
