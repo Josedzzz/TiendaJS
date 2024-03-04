@@ -63,7 +63,7 @@ export default class Tienda {
     registrarCliente(identificacion, nombre, direccion) {
 
         try {
-            if (this.isCamposValidosCliente(identificacion, nombre, direccion) === true || !this.hashMapClientes.has(identificacion)) {
+            if (this.isCamposValidosCliente(identificacion, nombre, direccion) || !this.hashMapClientes.has(identificacion)) {
 
                 logExito("Registro Cliente: Campos validos y no existe el cliente.")
                 const cliente = new Cliente(identificacion, nombre, direccion);
@@ -100,17 +100,19 @@ export default class Tienda {
      * @param {*} nuevaDireccion 
      */
     actualizarCliente(identificacion, nuevoNombre, nuevaDireccion) {
-        if (this.isCamposValidosCliente(identificacion, nuevoNombre, nuevaDireccion)) {
-            if (this.hashMapClientes.has(identificacion)) {
-                const cliente = this.hashMapClientes.get(identificacion);
-                cliente.setNombre(nuevoNombre);
-                cliente.setDireccion(nuevaDireccion);
-                alert(`Cliente con identificación ${identificacion} actualizado.`);
-            } else {
-                alert(`El cliente con identificación ${identificacion} no existe.`);
+
+        try {
+            if (this.isCamposValidosActualizacionCliente(nuevoNombre, nuevaDireccion)) {
+                if (this.hashMapClientes.has(identificacion)) {
+                    const cliente = this.hashMapClientes.get(identificacion);
+                    cliente.setNombre(nuevoNombre);
+                    cliente.setDireccion(nuevaDireccion);
             }
-        } else {
-            alert("Por favor asegurese de que los campos de cliente esten llenos");
+            return 'exito';
+        }
+        } catch(error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
@@ -132,6 +134,26 @@ export default class Tienda {
             flag = false;
             throw new Excepciones.ErrorDeValidacion('La identificación debe ser un número entero positivo.');
         }
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof direccion !== 'string' || direccion.trim() === '') {
+            flag = false
+            throw new Excepciones.ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
+        }
+        return flag;
+    }
+
+    /**
+     * Función para verificar los campos de texto cuando se quiere actualizar un cliente, es distinta a la de registro ya que no se verifica la identificación para evitar ambigüedades. Perdón dios.
+     * @param {*} nombre 
+     * @param {*} direccion 
+     * @returns 
+     */
+    isCamposValidosActualizacionCliente(nombre, direccion) {
+
+        let flag = true;
         if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
             flag = false;
             throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');

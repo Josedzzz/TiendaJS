@@ -80,6 +80,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnActualizarCliente = document.getElementById('btnActualizarCliente');
     const tablaClientes = document.getElementById('tablaClientes');
     let clienteSeleccionado = null;
+    let campoIdentificacion = document.getElementById('identificacion');
+    let campoNombre = document.getElementById('nombre');
+    let campoDireccion = document.getElementById('direccion');
 
     //Funcion para mostrar los clientes actuales de la tienda
     function mostrarClientes() {
@@ -143,8 +146,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // Agregar la clase 'seleccionado' a la fila actual
         filaCliente.classList.add('seleccionado');
 
-        // Actualizo clienteSeleccionado
+        // Actualizo clienteSeleccionado y muestro la información del cliente en el formulario, para que el usuario pueda actualizarla.
         clienteSeleccionado = filaCliente.cells[0].textContent;
+
+        campoIdentificacion.value = filaCliente.cells[0].textContent;
+        campoNombre.value = filaCliente.cells[1].textContent;
+        campoDireccion.value = filaCliente.cells[2].textContent;
     });
 
 
@@ -181,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Asociar un evento al boton de eliminar cliente
     btnEliminarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
-            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un cliente en la tabla.');
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un cliente de la tabla para poder eliminarlo.');
             return;
         }
         const idCliente = clienteSeleccionado;
@@ -189,8 +196,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (resultadoEliminacion === 'exito') {
             sweetAlert.mostrarPopupExito('Cliente eliminado exitosamente.');
             clienteSeleccionado = null;
+            formCliente.reset();
         } else {
-            //Mostrar un mensaje de error. No llega acá por el simple hecho de que el cliente seleccionado no puede ser nulo.
+            //Mostrar un mensaje de error. No llega acá por el simple hecho de que el cliente seleccionado tiene que ser seleccionado. Igual se deja por si acaso. - Daniel
             sweetAlert.mostrarPopupError(resultadoEliminacion);
         }
     });
@@ -206,17 +214,26 @@ document.addEventListener('DOMContentLoaded', function () {
         return resultadoEliminacion;
     }
 
-    //Se asocia un evento al boton de actualizar cliente
+    //Se asocia un evento al botón para actualizar la información de un cliente a excepción de su identificación.
     btnActualizarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
-            alert('Por favor seleccione un cliente en la tabla.');
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un cliente de la tabla para poder actualizarlo.');
             return;
         }
         const idCliente = clienteSeleccionado;
         const nuevoNombre = document.getElementById('nombre').value;
         const nuevaDireccion = document.getElementById('direccion').value;
-        actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
-        formCliente.reset();
+        campoIdentificacion.ariaReadOnly = true; //No se puede cambiar la identificación del cliente
+        //campoIdentificacion.value = clienteSeleccionado;
+        let resultadoActualizacion =  actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+
+        if (resultadoActualizacion === 'exito') {
+            sweetAlert.mostrarPopupExito('Cliente actualizado exitosamente.');
+            clienteSeleccionado = null;
+            formCliente.reset();
+        } else {
+            sweetAlert.mostrarPopupError(resultadoActualizacion);
+        }
     });
 
     /**
@@ -226,9 +243,10 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} nuevaDireccion 
      */
     function actualizarCliente(idCliente, nuevoNombre, nuevaDireccion) {
-        tienda.actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+        let resultadoActualizacion = tienda.actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
         //Actualizo la tabla 
         mostrarClientes();
+        return resultadoActualizacion;
     }
 
     //MANEJO DE LA VENTANA DE PRODUCTOS -------------------------------------------------------------
