@@ -25,6 +25,9 @@ export default class Tienda {
         this.hashMapClientes = new Map(); 
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
         this.historialVentas = new LinkedList();
+
+        //Deserializar clientes al iniciar la tienda
+        this.deserializarClientes(localStorage.getItem('clientes')); 
     }
 
     getClientes() {
@@ -37,6 +40,26 @@ export default class Tienda {
 
     getVentas() {
         return this.listaVentas;
+    }
+
+    /**
+     * Funcion para serializar los clientes en formato JSON
+     * @returns 
+     */
+    serializarClientes() {
+        const clientesArray = Array.from(this.hashMapClientes.values());
+        return JSON.stringify(clientesArray);
+    }
+
+    /**
+     * Funcion para deserializar clientes a partir de un JSON y cargarlos en el hashMap de clientes
+     * @param {*} jsonClientes 
+     */
+    deserializarClientes(jsonClientes) {
+        const clientesArray = JSON.parse(jsonClientes);
+        for (const cliente of clientesArray) {
+            this.hashMapClientes.set(cliente.identificacion, new Cliente(cliente.identificacion, cliente.nombre, cliente.direccion));
+        }
     }
 
     //CRUD DE CLIENTES --------------------------------------------------------------------------------
@@ -64,6 +87,9 @@ export default class Tienda {
                 //Imprimir el hashMap de clientes para verificar si se registro correctamente
                 console.log("Se registró el cliente:");
                 this.imprimirClientes();
+                //Serializo los clientes
+                const clientesSerializados = this.serializarClientes();
+                localStorage.setItem('clientes', clientesSerializados);
             }        
         } else {
             alert("Por favor asegurese de que los campos de cliente esten llenos");
@@ -80,6 +106,9 @@ export default class Tienda {
             this.hashMapClientes.delete(idCliente);
             this.imprimirClientes();
             alert(`Cliente con identificación ${idCliente} eliminado.`);
+            //Serializo los clientes
+            const clientesSerializados = this.serializarClientes();
+            localStorage.setItem('clientes', clientesSerializados);
         } else {
             alert(`El cliente con identificación ${idCliente} no existe.`);
         }
@@ -98,6 +127,9 @@ export default class Tienda {
                 cliente.setNombre(nuevoNombre);
                 cliente.setDireccion(nuevaDireccion);
                 alert(`Cliente con identificación ${identificacion} actualizado.`);
+                //Serializo los clientes
+                const clientesSerializados = this.serializarClientes();
+                localStorage.setItem('clientes', clientesSerializados);
             } else {
                 alert(`El cliente con identificación ${identificacion} no existe.`);
             }

@@ -14,8 +14,6 @@ export default class Cliente {
         this.identificacion = identificacion;
         this.nombre = nombre;
         this.direccion = direccion;
-        this.carritoCompras = new Map();
-        this.listaCompras = [];
     }
 
     /**
