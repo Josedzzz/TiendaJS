@@ -29,6 +29,7 @@ export default class Tienda {
         //Deserializar los datos al iniciar la tienda
         this.deserializarClientes(localStorage.getItem('clientes')); 
         this.deserializarProductos(localStorage.getItem('productos'));
+        this.deserializarVentas(localStorage.getItem('ventas'));
     }
 
     getClientes() {
@@ -87,7 +88,23 @@ export default class Tienda {
         }
     }
 
+    /**
+     * Funcion para serializar las ventas en formato JSON
+     * @returns 
+     */
+    serializarVentas() {
+        return JSON.stringify(this.listaVentas);
+    }
 
+    /**
+     * Funcion para deserializar ventas a partir de un JSON y cargarlos en la lista de ventas
+     * @param {*} jsonVentas 
+     */
+    deserializarVentas(jsonVentas) {
+        if (jsonVentas) {
+            this.listaVentas = JSON.parse(jsonVentas);
+        }
+    }
 
     //CRUD DE CLIENTES --------------------------------------------------------------------------------
 
@@ -399,6 +416,13 @@ export default class Tienda {
         cliente.vaciarCarrito();
 
         alert('Venta realizada con éxito:', venta.codigo);
+
+        //Serializo las ventas
+        const ventasSerializadas = this.serializarVentas();
+        localStorage.setItem('ventas', ventasSerializadas);
+        //Serializo los productos
+        const productiosSerializados = this.serializarProductos();
+        localStorage.setItem('productos', productiosSerializados);
     }
 
     /**
@@ -429,6 +453,13 @@ export default class Tienda {
         this.historialVentas.deleteVenta(codigoVenta);
 
         alert(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
+
+        //Serializo las ventas
+        const ventasSerializadas = this.serializarVentas();
+        localStorage.setItem('ventas', ventasSerializadas);
+        //Serializo los productos
+        const productiosSerializados = this.serializarProductos();
+        localStorage.setItem('productos', productiosSerializados);
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
