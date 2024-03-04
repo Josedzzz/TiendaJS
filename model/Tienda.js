@@ -26,8 +26,9 @@ export default class Tienda {
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
         this.historialVentas = new LinkedList();
 
-        //Deserializar clientes al iniciar la tienda
+        //Deserializar los datos al iniciar la tienda
         this.deserializarClientes(localStorage.getItem('clientes')); 
+        this.deserializarProductos(localStorage.getItem('productos'));
     }
 
     getClientes() {
@@ -63,6 +64,30 @@ export default class Tienda {
             }
         }
     }
+
+    /**
+     * Funcion para serializar los productos en formato JSON
+     * @returns 
+     */
+    serializarProductos() {
+        const productosArray = Array.from(this.hashMapProductos.values());
+        return JSON.stringify(productosArray);
+    }
+
+    /**
+     * Funcion para deserializar productos a partir de un JSON y cargarlos en el hashMap de productos
+     * @param {*} jsonProductos 
+     */
+    deserializarProductos(jsonProductos) {
+        if (jsonProductos) {
+            const productosArray = JSON.parse(jsonProductos);
+            for (const producto of productosArray) {
+                this.hashMapProductos.set(producto.codigo, new Producto(producto.codigo, producto.nombre, producto.precio, producto.cantidad));
+            }
+        }
+    }
+
+
 
     //CRUD DE CLIENTES --------------------------------------------------------------------------------
 
@@ -184,6 +209,9 @@ export default class Tienda {
                 //Imprimir el hashMap de productos para verificar si se registro correctamente
                 console.log("Se registró el producto")
                 this.imprimirProductos();
+                //Serializo los productos
+                const productiosSerializados = this.serializarProductos();
+                localStorage.setItem('productos', productiosSerializados);
             }
         } else {
             alert("Por favor asegurese de que los campos del producto esten llenos");
@@ -199,6 +227,9 @@ export default class Tienda {
             this.hashMapProductos.delete(codigoProducto);
             this.imprimirProductos();
             alert(`Producto con código ${codigoProducto} eliminado.`);
+            //Serializo los productos
+            const productiosSerializados = this.serializarProductos();
+            localStorage.setItem('productos', productiosSerializados);
         } else {
             alert(`Producto con código ${codigoProducto} no existe.`);
         }
@@ -219,6 +250,9 @@ export default class Tienda {
                 producto.setPrecio(nuevoPrecio);
                 producto.setCantidad(nuevaCantidad);
                 alert(`Producto con código ${codigo} actualizado.`);
+                //Serializo los productos
+                const productiosSerializados = this.serializarProductos();
+                localStorage.setItem('productos', productiosSerializados);
             } else {
                 alert(`El producto con código ${codigo} no existe.`);
             }
