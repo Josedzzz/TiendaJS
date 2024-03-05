@@ -80,9 +80,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnActualizarCliente = document.getElementById('btnActualizarCliente');
     const tablaClientes = document.getElementById('tablaClientes');
     let clienteSeleccionado = null;
-    let campoIdentificacion = document.getElementById('identificacion');
-    let campoNombre = document.getElementById('nombre');
-    let campoDireccion = document.getElementById('direccion');
+    let campoIdentificacionCliente = document.getElementById('identificacion');
+    let campoNombreCliente = document.getElementById('nombre');
+    let campoDireccionCliente = document.getElementById('direccion');
 
     //Funcion para mostrar los clientes actuales de la tienda
     function mostrarClientes() {
@@ -149,26 +149,26 @@ document.addEventListener('DOMContentLoaded', function () {
         // Actualizo clienteSeleccionado y muestro la información del cliente en el formulario, para que el usuario pueda actualizarla.
         clienteSeleccionado = filaCliente.cells[0].textContent;
 
-        campoIdentificacion.value = filaCliente.cells[0].textContent;
-        campoNombre.value = filaCliente.cells[1].textContent;
-        campoDireccion.value = filaCliente.cells[2].textContent;
+        campoIdentificacionCliente.value = filaCliente.cells[0].textContent;
+        campoNombreCliente.value = filaCliente.cells[1].textContent;
+        campoDireccionCliente.value = filaCliente.cells[2].textContent;
     });
 
-
+    //registrar cliente
     //Agregar un evento de click al boton de registrar cliente
     btnRegistrarCliente.addEventListener('click', function (event) {
         event.preventDefault();
         const identificacion = document.getElementById('identificacion').value;
         const nombre = document.getElementById('nombre').value;
         const direccion = document.getElementById('direccion').value;
-        let resultadoRegistro = registrarCliente(identificacion, nombre, direccion);
+        let resultadoRegistroCliente = registrarCliente(identificacion, nombre, direccion);
 
         //Limpiar los campos del formulario si hubo un registro exitoso. 
-        if (resultadoRegistro === 'exito') {
+        if (resultadoRegistroCliente === 'exito') {
             sweetAlert.mostrarPopupExito('Cliente registrado exitosamente.');
             formCliente.reset();
         } else {
-            sweetAlert.mostrarPopupError(resultadoRegistro)
+            sweetAlert.mostrarPopupError(resultadoRegistroCliente)
         }
     });
 
@@ -185,6 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return flag;
     }
 
+    //Eliminar cliente
     //Asociar un evento al boton de eliminar cliente
     btnEliminarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
@@ -192,14 +193,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         const idCliente = clienteSeleccionado;
-        let resultadoEliminacion = eliminarCliente(idCliente);
-        if (resultadoEliminacion === 'exito') {
+        let resultadoEliminacionCliente = eliminarCliente(idCliente);
+        if (resultadoEliminacionCliente === 'exito') {
             sweetAlert.mostrarPopupExito('Cliente eliminado exitosamente.');
             clienteSeleccionado = null;
             formCliente.reset();
         } else {
             //Mostrar un mensaje de error. No llega acá por el simple hecho de que el cliente seleccionado tiene que ser seleccionado. Igual se deja por si acaso. - Daniel
-            sweetAlert.mostrarPopupError(resultadoEliminacion);
+            sweetAlert.mostrarPopupError(resultadoEliminacionCliente);
         }
     });
 
@@ -223,16 +224,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const idCliente = clienteSeleccionado;
         const nuevoNombre = document.getElementById('nombre').value;
         const nuevaDireccion = document.getElementById('direccion').value;
-        campoIdentificacion.ariaReadOnly = true; //No se puede cambiar la identificación del cliente
-        //campoIdentificacion.value = clienteSeleccionado;
-        let resultadoActualizacion =  actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+        campoIdentificacionCliente.ariaReadOnly = true; //No se puede cambiar la identificación del cliente, igual no sirve por que deja cambiarlo jaja. - Daniel
+        //campoIdentificacionCliente.value = clienteSeleccionado;
+        let resultadoActualizacionCliente =  actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
 
-        if (resultadoActualizacion === 'exito') {
+        if (resultadoActualizacionCliente === 'exito') {
             sweetAlert.mostrarPopupExito('Cliente actualizado exitosamente.');
             clienteSeleccionado = null;
             formCliente.reset();
         } else {
-            sweetAlert.mostrarPopupError(resultadoActualizacion);
+            sweetAlert.mostrarPopupError(resultadoActualizacionCliente);
         }
     });
 
@@ -258,6 +259,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnActualizarProducto = document.getElementById('btnActualizarProducto');
     const tablaProductos = document.getElementById('tablaProductos');
     let productoSeleccionado = null;
+    let campoNombreProducto = document.getElementById('nombre-producto');
+    let campoCodigoProducto = document.getElementById('codigo-producto');
+    let campoPrecioProducto = document.getElementById('precio-producto');
+    let campoCantidadProducto = document.getElementById('cantidad-producto');
 
     //Funcion para mostrar los productos actuales de la tienda
     function mostrarProductos() {
@@ -327,9 +332,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         //Actualizo productoSeleccionado
         productoSeleccionado = filaProducto.cells[1].textContent;
-        console.log("Producto seleccionado: " + productoSeleccionado);
+
+        campoNombreProducto.value = filaProducto.cells[0].textContent;
+        campoCodigoProducto.value = filaProducto.cells[1].textContent;
+        campoPrecioProducto.value = filaProducto.cells[2].textContent;
+        campoCantidadProducto.value = filaProducto.cells[3].textContent;
     });
 
+    //registrar producto
     //Agregar un evento de click al boton de registrarProducto
     btnRegistrarProducto.addEventListener('click', function (event) {
         event.preventDefault();
@@ -337,9 +347,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const codigoProducto = document.getElementById('codigo-producto').value;
         const precioProducto = document.getElementById('precio-producto').value;
         const cantidadProducto = document.getElementById('cantidad-producto').value;
-        registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+        let resultadoRegistroProducto = registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
         //Limpia los campos del formulario
-        formProducto.reset();
+        if (resultadoRegistroProducto === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto registrado exitosamente.');
+            formProducto.reset();
+        } else {
+            sweetAlert.mostrarPopupError(resultadoRegistroProducto)
+        }
     });
 
     /**
@@ -350,44 +365,61 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} cantidad 
      */
     function registrarProducto(codigo, nombre, precio, cantidad) {
-        tienda.registrarProducto(codigo, nombre, precio, cantidad);
+        let flag = tienda.registrarProducto(codigo, nombre, precio, cantidad);
         //Actualizo la tabla
         mostrarProductos();
+        return flag;
     }
 
+    //Eliminar producto
     //Asociar un evento al boton de eliminar producto
     btnEliminarProducto.addEventListener('click', function () {
         if (!productoSeleccionado) {
-            alert("Por favor seleccione un producto en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un producto de la tabla para poder eliminarlo.');
             return;
         }
         const codigoProducto = productoSeleccionado;
-        eliminarProducto(codigoProducto);
-        productoSeleccionado = null;
+        let resultadoEliminacionProducto = eliminarProducto(codigoProducto);
+        if(resultadoEliminacionProducto === 'exito'){
+            sweetAlert.mostrarPopupExito('Producto eliminado exitosamente.');
+            productoSeleccionado = null;
+            formProducto.reset();
+        } else {
+            //De nuevo, nunca llega aca pero lo dejo por si acaso. - Daniel
+            sweetAlert.mostrarPopupError(resultadoEliminacionProducto);
+        }
     });
 
     /**
-     * Llama a la tienda para eliminar un producto dado su codigo
+     * Llama a la tienda para eliminar un producto dado su codigo. Girl thats bad for us.
      * @param {*} codigoProducto 
      */
     function eliminarProducto(codigoProducto) {
-        tienda.eliminarProducto(codigoProducto);
+        let resultadoEliminacion = tienda.eliminarProducto(codigoProducto);
         //Actualizo la tabla
         mostrarProductos();
+        return resultadoEliminacion;
     }
 
     //Asociar un evento al boton de de actualizar producto
     btnActualizarProducto.addEventListener('click', function () {
         if (!productoSeleccionado) {
-            alert("Por favor seleccione un producto en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un producto de la tabla para poder actualizarlo.');
             return;
         }
         const codigoProducto = productoSeleccionado;
         const nombreProducto = document.getElementById('nombre-producto').value;
         const precioProducto = document.getElementById('precio-producto').value;
         const cantidadProducto = document.getElementById('cantidad-producto').value;
-        actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
-        formProducto.reset();
+        let resultadoActualizacionProducto = actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+
+        if (resultadoActualizacionProducto === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto actualizado exitosamente.');
+            productoSeleccionado = null;
+            formProducto.reset();
+        } else { 
+            sweetAlert.mostrarPopupError(resultadoActualizacionProducto);
+        }
     });
 
     /**
@@ -398,9 +430,10 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} nuevaCantidad 
      */
     function actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
-        tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
+        let resultadoActualizacion =  tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
         //Actualizo la tabla
         mostrarProductos();
+        return resultadoActualizacion;
     }
 
     //MANEJO DE LA VENTANA DE CARRITO -------------------------------------------------------------------

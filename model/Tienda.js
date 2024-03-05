@@ -107,10 +107,10 @@ export default class Tienda {
                     const cliente = this.hashMapClientes.get(identificacion);
                     cliente.setNombre(nuevoNombre);
                     cliente.setDireccion(nuevaDireccion);
+                }
+                return 'exito';
             }
-            return 'exito';
-        }
-        } catch(error) {
+        } catch (error) {
             logError(error.message);
             return error.message;
         }
@@ -184,19 +184,18 @@ export default class Tienda {
      * @param {*} cantidad 
      */
     registrarProducto(codigo, nombre, precio, cantidad) {
-        if (this.isCamposValidosProducto(codigo, nombre, precio, cantidad)) {
-            if (this.hashMapProductos.has(codigo)) {
-                alert("El producto con el codigo " + codigo + " ya está registrado");
-            } else {
+        try {
+            if (this.isCamposValidosProducto(codigo, nombre, precio, cantidad) || !this.hashMapProductos.has(codigo)) {
+                logExito("Se registró el producto con codigo: " + codigo)
                 const producto = new Producto(codigo, nombre, precio, cantidad);
                 this.hashMapProductos.set(codigo, producto);
-                alert("Producto registrado con éxito");
                 //Imprimir el hashMap de productos para verificar si se registro correctamente
-                console.log("Se registró el producto")
                 this.imprimirProductos();
             }
-        } else {
-            alert("Por favor asegurese de que los campos del producto esten llenos");
+            return 'exito';
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
@@ -208,10 +207,10 @@ export default class Tienda {
         if (this.hashMapProductos.has(codigoProducto)) {
             this.hashMapProductos.delete(codigoProducto);
             this.imprimirProductos();
-            alert(`Producto con código ${codigoProducto} eliminado.`);
+            return 'exito';
         } else {
             //alert(`Producto con código ${codigoProducto} no existe.`);
-            throw new Error(`Producto con código ${codigoProducto} no existe.`);
+            throw new Excepciones.EstadoProducto(`Producto con código ${codigoProducto} no existe.`);
         }
     }
 
@@ -223,18 +222,20 @@ export default class Tienda {
      * @param {*} nuevaCantidad 
      */
     actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
-        if (this.isCamposValidosProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad)) {
-            if (this.hashMapProductos.has(codigo)) {
-                const producto = this.hashMapProductos.get(codigo);
-                producto.setNombre(nuevoNombre);
-                producto.setPrecio(nuevoPrecio);
-                producto.setCantidad(nuevaCantidad);
-                alert(`Producto con código ${codigo} actualizado.`);
-            } else {
-                alert(`El producto con código ${codigo} no existe.`);
+
+        try {
+            if (this.isCamposValidosActualizacionProducto(nuevoNombre, nuevoPrecio, nuevaCantidad)) {
+                if (this.hashMapProductos.has(codigo)) {
+                    const producto = this.hashMapProductos.get(codigo);
+                    producto.setNombre(nuevoNombre);
+                    producto.setPrecio(nuevoPrecio);
+                    producto.setCantidad(nuevaCantidad);
+                } 
+                return 'exito';    
             }
-        } else {
-            alert("Por favor asegurese de que los campos de producto esten llenos");
+        } catch(error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
@@ -247,12 +248,49 @@ export default class Tienda {
      * @returns 
      */
     isCamposValidosProducto(codigo, nombre, precio, cantidad) {
-        if (!codigo || !nombre || !precio || !cantidad) {
-            return false;
-        } else {
-            return true;
+        let flag = true;
+
+        if (this.hashMapProductos.has(codigo)) {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('Un producto con ese codigo ya existe.');
         }
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof codigo !== 'string' || codigo.trim() === '') {
+            flag = false
+            throw new Excepciones.ErrorDeValidacion('El código no puede estar vacío o debe ser una cadena de texto');
+        }
+        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === ''){
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El precio debe ser un número positivo.');
+        }
+        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === ''){
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
+        }
+        return flag;
     }
+
+
+    isCamposValidosActualizacionProducto(nombre, precio, cantidad) {
+        let flag = true;
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === ''){
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El precio debe ser un número positivo.');
+        }
+        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === ''){
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
+        }
+        return flag;
+    }
+        
 
     /**
      * Imprime el hashMap de productos
