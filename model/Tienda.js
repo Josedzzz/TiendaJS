@@ -125,24 +125,19 @@ export default class Tienda {
      */
     isCamposValidosCliente(identificacion, nombre, direccion) {
 
-        let flag = true;
         if (this.hashMapClientes.has(identificacion)) {
-            flag = false;
             throw new Excepciones.ErrorDeValidacion('El cliente ya está registrado en la tienda.');
         }
         if (typeof +identificacion !== 'number' || identificacion < 0 || identificacion.trim() === '') {
-            flag = false;
             throw new Excepciones.ErrorDeValidacion('La identificación debe ser un número entero positivo.');
         }
         if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
-            flag = false;
             throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
         }
         if (typeof direccion !== 'string' || direccion.trim() === '') {
-            flag = false
             throw new Excepciones.ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
         }
-        return flag;
+        return true;
     }
 
     /**
@@ -230,10 +225,10 @@ export default class Tienda {
                     producto.setNombre(nuevoNombre);
                     producto.setPrecio(nuevoPrecio);
                     producto.setCantidad(nuevaCantidad);
-                } 
-                return 'exito';    
+                }
+                return 'exito';
             }
-        } catch(error) {
+        } catch (error) {
             logError(error.message);
             return error.message;
         }
@@ -248,29 +243,23 @@ export default class Tienda {
      * @returns 
      */
     isCamposValidosProducto(codigo, nombre, precio, cantidad) {
-        let flag = true;
 
         if (this.hashMapProductos.has(codigo)) {
-            flag = false;
             throw new Excepciones.ErrorDeValidacion('Un producto con ese codigo ya existe.');
         }
         if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
-            flag = false;
             throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
         }
         if (typeof codigo !== 'string' || codigo.trim() === '') {
-            flag = false
             throw new Excepciones.ErrorDeValidacion('El código no puede estar vacío o debe ser una cadena de texto');
         }
-        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === ''){
-            flag = false;
+        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === '') {
             throw new Excepciones.ErrorDeValidacion('El precio debe ser un número positivo.');
         }
-        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === ''){
-            flag = false;
+        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === '') {
             throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
         }
-        return flag;
+        return true;
     }
 
 
@@ -280,17 +269,17 @@ export default class Tienda {
             flag = false;
             throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
         }
-        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === ''){
+        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === '') {
             flag = false;
             throw new Excepciones.ErrorDeValidacion('El precio debe ser un número positivo.');
         }
-        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === ''){
+        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === '') {
             flag = false;
             throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
         }
         return flag;
     }
-        
+
 
     /**
      * Imprime el hashMap de productos
@@ -312,10 +301,8 @@ export default class Tienda {
         const cliente = this.hashMapClientes.get(identificacion);
         if (cliente) {
             return cliente.getCarritoCompras();
-        } else {
-            alert("La identificación ingresada no existe en la tienda.")
-            return null;
-        }
+        } 
+        return 'fallido';
     }
 
     /**
@@ -324,16 +311,25 @@ export default class Tienda {
      * @param {*} codigoProducto 
      * @param {*} cantidadProducto 
      */
-    agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto) {
-        const carritoCompras = this.getCarritoComprasCliente(idCliente);
-        const producto = this.hashMapProductos.get(codigoProducto);
-        //Revisa si el producto existe
-        if (producto) {
-            carritoCompras.set(producto, cantidadProducto);
-            alert(`Se agregaron ${cantidadProducto} unidades de ${producto.nombre} al carrito.`)
-        } else {
-            alert('Codigo del producto no valido');
+    agregarProductoCarrito(idCliente, codigoProducto, cantidadPedidaProducto) {
+        let carritoCompras = this.getCarritoComprasCliente(idCliente);
+        console.log(carritoCompras);
+
+        //Operador ternario para obtener la cantidad de un producto. Si no existe, se le asigna 0.
+        let cantidadProducto = (this.hashMapProductos.has(codigoProducto)) ? this.hashMapProductos.get(codigoProducto).cantidad : 0;
+        console.log(cantidadProducto);
+        //Se validan los campos. Tambien se revisa si el producto existe y si hay suficiente cantidad en el inventario
+        try {
+            this.isCamposValidosCarritoDeCompras(codigoProducto, cantidadProducto, cantidadPedidaProducto);
+        } catch(error) {
+            logError(error.message);
+            return error.message;
         }
+        let producto = this.hashMapProductos.get(codigoProducto);
+        let productoAlCarrito = new Producto(producto.codigo, producto.nombre, producto.precio, cantidadPedidaProducto);
+        carritoCompras.set(codigoProducto, productoAlCarrito); //Se agrega el producto al carrito, no es lo ideal pero que quede así por ahora. Quiero vivir.
+
+        return 'exito';
     }
 
     /**
@@ -342,13 +338,27 @@ export default class Tienda {
      * @param {*} codigoProducto 
      */
     eliminarProductoCarrito(idCliente, codigoProducto) {
-        const carritoCompras = this.getCarritoComprasCliente(idCliente);
-        const producto = this.hashMapProductos.get(codigoProducto);
-        if (producto && carritoCompras.has(producto)) {
-            carritoCompras.delete(producto);
-            alert(`El producto ${producto.nombre} ha sido eliminado del carrito.`);
-        } else {
-            alert('El producto no existe en el carrito.');
+        let carritoCompras = this.getCarritoComprasCliente(idCliente);
+        let producto = this.hashMapProductos.get(codigoProducto);
+        if (producto === null || producto === undefined || !carritoCompras.has(producto.codigo)) {
+            throw new Excepciones.EstadoProducto(`El producto con código ${codigoProducto} no existe en el carrito.`);
+        }
+        carritoCompras.delete(producto.codigo);
+        return 'exito';
+    }
+
+    isCamposValidosCarritoDeCompras(codigo, cantidadTotal,  cantidadPedida) {
+        if(typeof +codigo !== 'number' || codigo < 0 || codigo.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('El código del producto debe ser un número positivo.');
+        }
+        if (!this.hashMapProductos.has(codigo)) {
+            throw new Excepciones.ErrorDeValidacion('No existe un producto con ese codigo.');
+        }
+        if (typeof +cantidadPedida !== 'number' || cantidadPedida < 0 || cantidadPedida.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
+        }
+        if (+cantidadTotal < +cantidadPedida) {
+            throw new Excepciones.EstadoProducto(`La cantidad solicitada excede la cantidad disponible en el inventario.`);
         }
     }
 

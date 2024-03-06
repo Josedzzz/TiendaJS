@@ -1,4 +1,5 @@
 import Tienda from "../model/Tienda.js";
+import { logExito } from "../model/utils/logger.js";
 import * as sweetAlert from "../model/utils/sweetAlert.js";
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -54,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    /*
+    * Muestra el formulario correspondiente y oculta los demas.*/
     const mostrarFormulario = (formId) => {
         //Muestra el formulario
         const form = document.getElementById(formId);
@@ -149,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Actualizo clienteSeleccionado y muestro la información del cliente en el formulario, para que el usuario pueda actualizarla.
         clienteSeleccionado = filaCliente.cells[0].textContent;
 
+        //Muestro la información del cliente en el formulario
         campoIdentificacionCliente.value = filaCliente.cells[0].textContent;
         campoNombreCliente.value = filaCliente.cells[1].textContent;
         campoDireccionCliente.value = filaCliente.cells[2].textContent;
@@ -226,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const nuevaDireccion = document.getElementById('direccion').value;
         campoIdentificacionCliente.ariaReadOnly = true; //No se puede cambiar la identificación del cliente, igual no sirve por que deja cambiarlo jaja. - Daniel
         //campoIdentificacionCliente.value = clienteSeleccionado;
-        let resultadoActualizacionCliente =  actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+        let resultadoActualizacionCliente = actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
 
         if (resultadoActualizacionCliente === 'exito') {
             sweetAlert.mostrarPopupExito('Cliente actualizado exitosamente.');
@@ -346,8 +350,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const nombreProducto = document.getElementById('nombre-producto').value;
         const codigoProducto = document.getElementById('codigo-producto').value;
         const precioProducto = document.getElementById('precio-producto').value;
-        const cantidadProducto = document.getElementById('cantidad-producto').value;
-        let resultadoRegistroProducto = registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+        const cantidadProductoRegistrado = document.getElementById('cantidad-producto').value;
+        let resultadoRegistroProducto = registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProductoRegistrado);
         //Limpia los campos del formulario
         if (resultadoRegistroProducto === 'exito') {
             sweetAlert.mostrarPopupExito('Producto registrado exitosamente.');
@@ -380,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const codigoProducto = productoSeleccionado;
         let resultadoEliminacionProducto = eliminarProducto(codigoProducto);
-        if(resultadoEliminacionProducto === 'exito'){
+        if (resultadoEliminacionProducto === 'exito') {
             sweetAlert.mostrarPopupExito('Producto eliminado exitosamente.');
             productoSeleccionado = null;
             formProducto.reset();
@@ -410,14 +414,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const codigoProducto = productoSeleccionado;
         const nombreProducto = document.getElementById('nombre-producto').value;
         const precioProducto = document.getElementById('precio-producto').value;
-        const cantidadProducto = document.getElementById('cantidad-producto').value;
-        let resultadoActualizacionProducto = actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+        const cantidadProductoActualizado = document.getElementById('cantidad-producto').value;
+        let resultadoActualizacionProducto = actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProductoActualizado);
 
         if (resultadoActualizacionProducto === 'exito') {
             sweetAlert.mostrarPopupExito('Producto actualizado exitosamente.');
             productoSeleccionado = null;
             formProducto.reset();
-        } else { 
+        } else {
             sweetAlert.mostrarPopupError(resultadoActualizacionProducto);
         }
     });
@@ -430,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} nuevaCantidad 
      */
     function actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
-        let resultadoActualizacion =  tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
+        let resultadoActualizacion = tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
         //Actualizo la tabla
         mostrarProductos();
         return resultadoActualizacion;
@@ -449,7 +453,8 @@ document.addEventListener('DOMContentLoaded', function () {
     //Funcion para mostrar los productos actuales en el carrito del cliente
     function mostrarProductosCarrito(identificacionCliente) {
         if (identificacionCliente === null) {
-            alert('El identificador del cliente es nulo');
+            //No new popup for you
+            sweetAlert.mostartPopupPrecaucion('El identificador del cliente es nulo');
             return;
         }
         //Limpia el carrito antes de actualizarlo
@@ -471,29 +476,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         //Obtener el hashMap de carrito de un cliente
         const carritoCompras = tienda.getCarritoComprasCliente(identificacionCliente);
-        if (carritoCompras === null) {
+        if (carritoCompras === 'fallido') {
+            sweetAlert.mostrarPopupError('El cliente no cuenta con un carrito de compras.');
             return;
         }
 
         //Add productos a la tabla con sus cantidades
-        carritoCompras.forEach((cantidad, producto) => {
+        carritoCompras.forEach((valorActual, idCliente, producto) => {
+
             const fila = document.createElement('tr');
             fila.classList.add('fila-producto-carrito');
 
             const codigoCell = document.createElement('td');
-            codigoCell.textContent = producto.codigo;
+            codigoCell.textContent = valorActual.codigo;
             fila.appendChild(codigoCell);
 
-            const nombreCell = document.createElement('td');
-            nombreCell.textContent = producto.nombre;
+            const nombreCell = document.createElement('td');    
+            nombreCell.textContent = valorActual.nombre;
             fila.appendChild(nombreCell);
 
             const precioCell = document.createElement('td');
-            precioCell.textContent = producto.precio;
+            precioCell.textContent = valorActual.precio;
             fila.appendChild(precioCell);
 
             const cantidadCell = document.createElement('td');
-            cantidadCell.textContent = cantidad;
+            cantidadCell.textContent = valorActual.cantidad;
             fila.appendChild(cantidadCell);
 
             tabla.appendChild(fila);
@@ -508,7 +515,6 @@ document.addEventListener('DOMContentLoaded', function () {
         //Obtener la fila en la que se hizo click
         const filaProducto = event.target.closest('tr');
         if (!filaProducto) return;
-
         //Elimina la clase 'seleccionado' de la fila previamente seleccionada (si existe)
         const filaSeleccionada = tablaProductosCarrito.querySelector('.seleccionado');
         if (filaSeleccionada) {
@@ -519,42 +525,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
         //Actualizo el productoSeleccionado
         productoCarritoSeleccionado = filaProducto.cells[0].textContent;
-        console.log("Producto carrito seleccionado: " + productoCarritoSeleccionado);
+        logExito("Producto del carrito seleccionado: " + productoCarritoSeleccionado);
     });
 
-    //Agregar un evento de click al boton de agregarProducto
+    //Agregar un evento de click al boton de agregarProducto al carrito
     btnAgregarProductoCarrito.addEventListener('click', function (event) {
         event.preventDefault();
         const idCliente = document.getElementById('identificacion-cliente-carrito').value;
         const codigoProducto = document.getElementById('codigo-producto-carrito').value;
-        const cantidadProducto = document.getElementById('cantidad-producto-carrito').value;
-        agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto);
+        const cantidadProductoParaCarrito = document.getElementById('cantidad-producto-carrito').value;
+        let resultadoAgregarProductoAlCarrito = agregarProductoCarrito(idCliente, codigoProducto, cantidadProductoParaCarrito);
+
+        if (resultadoAgregarProductoAlCarrito === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto agregado al carrito exitosamente.');
+            formCarrito.reset();
+            document.getElementById('identificacion-cliente-carrito').value = idCliente;
+        } else {
+            sweetAlert.mostrarPopupError('Producto no agregado al carrito: ' + resultadoAgregarProductoAlCarrito);
+        }
         //Limpio los campos del formulario excepto el id del cliente
-        formCarrito.reset();
-        document.getElementById('identificacion-cliente-carrito').value = idCliente;
+
     });
 
     /**
      * Llama a la tienda para registrar un producto en el carrito de un cliente
      * @param {*} idCliente 
      * @param {*} codigoProducto 
-     * @param {*} cantidadProducto 
+     * @param {*} cantidadProductoParaCarrito 
      */
-    function agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto) {
-        tienda.agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto);
+    function agregarProductoCarrito(idCliente, codigoProducto, cantidadProductoParaCarrito) {
+
+        let resultadoAgregacion = '';
+        try {
+            resultadoAgregacion = tienda.agregarProductoCarrito(idCliente, codigoProducto, cantidadProductoParaCarrito);
+            mostrarProductosCarrito(idCliente);
+        } catch (error) {
+            resultadoAgregacion = error.message;
+        }
         //Actualizo la tabla del carrito
-        mostrarProductosCarrito(idCliente);
+        return resultadoAgregacion;
     }
 
     //Asociar un evento al boton de eliminar producto del carrito
     btnEliminarProductoCarrito.addEventListener('click', function () {
         if (!productoCarritoSeleccionado) {
-            alert("Por favor seleccione un producto en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un producto del carrito para poder eliminarlo.');
             return;
         }
         const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
         const codigoProducto = productoCarritoSeleccionado;
-        eliminarProductoCarrito(identificacionCliente, codigoProducto);
+        let resultadoEliminarProductoCarrito = eliminarProductoCarrito(identificacionCliente, codigoProducto);
+        if(resultadoEliminarProductoCarrito === 'exito'){
+            sweetAlert.mostrarPopupExito('Producto eliminado del carrito exitosamente.');
+        } else {
+            sweetAlert.mostrarPopupError('Producto no eliminado del carrito: ' + resultadoEliminarProductoCarrito);
+        }
         productoCarritoSeleccionado = null;
     });
 
@@ -564,9 +589,15 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} codigoProducto 
      */
     function eliminarProductoCarrito(idCliente, codigoProducto) {
-        tienda.eliminarProductoCarrito(idCliente, codigoProducto);
-        //Actualizo la tabla
-        mostrarProductosCarrito(idCliente);
+        let resultadoEliminarProductoCarrito = '';
+        try {
+            resultadoEliminarProductoCarrito = tienda.eliminarProductoCarrito(idCliente, codigoProducto);
+            //Se actualiza la tabla del carrito.
+            mostrarProductosCarrito(idCliente);
+        } catch (error) {
+            resultadoEliminarProductoCarrito = error.message;
+        }
+        return resultadoEliminarProductoCarrito;
     }
 
     //Asocia un evento al boton de mostrar el carrito de un cliente
@@ -574,6 +605,7 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
         mostrarProductosCarrito(identificacionCliente);
+        sweetAlert.mostrarPopupExito('Carrito del cliente mostrado exitosamente.');
     });
 
     //MANEJO DE LA VENTANA DE VENTA -----------------------------------------------------------------------

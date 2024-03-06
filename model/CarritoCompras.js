@@ -5,9 +5,14 @@ class CarritoCompras {
      * @param {*} cliente 
      * @param {*} hashmapProductos 
      */
+    constructor(idProducto, producto) {
+        this.idProducto = idProducto;
+        this.producto = producto;
+    }
+
     constructor(cliente, hashmapProductos) {
         this.cliente = cliente;
-        this.hashmapProductos = new Map();
+        this.hashmapProductos = hashmapProductos;
     }
 
 }
