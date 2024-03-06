@@ -692,9 +692,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const codigoVenta = document.getElementById('codigo-venta').value;
         const idClienteVenta = document.getElementById('cliente-venta').value;
         const fechaVenta = document.getElementById('fecha-venta').value;
-        registrarVenta(codigoVenta, idClienteVenta, fechaVenta);
+        let resultadoRegistroVenta = registrarVenta(codigoVenta, idClienteVenta, fechaVenta);
         //Limpia los campos del formulario
-        formVenta.reset();
+        if(resultadoRegistroVenta === 'exito'){
+            sweetAlert.mostrarPopupExito('Venta registrada exitosamente.');
+            formVenta.reset();
+        } else {    
+            sweetAlert.mostrarPopupError('No se puedo realizar la venta: ' + resultadoRegistroVenta);
+        }
     });
 
     /**
@@ -704,20 +709,27 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} fechaVenta 
      */
     function registrarVenta(codigoVenta, idClienteVenta, fechaVenta) {
-        tienda.realizarVenta(codigoVenta, idClienteVenta, fechaVenta);
+        let resultado = tienda.realizarVenta(codigoVenta, idClienteVenta, fechaVenta);
         //Actualizo la tabla de ventas
         mostrarVentas();
+        return resultado;
     }
 
     //Agrega un evento de click al boton de eliminar venta
     btnEliminarVenta.addEventListener('click', function () {
         if (!ventaSeleccionada) {
-            alert("Por favor seleccione una venta en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione una venta de la tabla para poder eliminarla.');
             return;
         }
         const codigoVenta = ventaSeleccionada;
-        eliminarVenta(codigoVenta);
-        ventaSeleccionada = null;
+        let resultadoEliminacionVenta = eliminarVenta(codigoVenta);
+        if(resultadoEliminacionVenta === 'exito'){
+            sweetAlert.mostrarPopupExito('Venta eliminada exitosamente.');
+            ventaSeleccionada = null;
+        } else {
+            //No creo que llegue nunca aca el codigo ya que la venta tiene que ser seleccionada, pero, igual lo dejo por si acaso. - Daniel
+            sweetAlert.mostrarPopupError('No se pudo eliminar la venta: ' + resultadoEliminacionVenta);
+        }
     });
 
     /**
@@ -725,9 +737,10 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {*} codigoVenta 
      */
     function eliminarVenta(codigoVenta) {
-        tienda.eliminarVenta(codigoVenta);
+        let resultado = tienda.eliminarVenta(codigoVenta);
         //Actualizo la tabla
         mostrarVentas();
+        return resultado;
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------

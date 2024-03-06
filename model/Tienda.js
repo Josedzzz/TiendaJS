@@ -301,7 +301,7 @@ export default class Tienda {
         const cliente = this.hashMapClientes.get(identificacion);
         if (cliente) {
             return cliente.getCarritoCompras();
-        } 
+        }
         return 'fallido';
     }
 
@@ -321,7 +321,7 @@ export default class Tienda {
         //Se validan los campos. Tambien se revisa si el producto existe y si hay suficiente cantidad en el inventario
         try {
             this.isCamposValidosCarritoDeCompras(codigoProducto, cantidadProducto, cantidadPedidaProducto);
-        } catch(error) {
+        } catch (error) {
             logError(error.message);
             return error.message;
         }
@@ -347,8 +347,8 @@ export default class Tienda {
         return 'exito';
     }
 
-    isCamposValidosCarritoDeCompras(codigo, cantidadTotal,  cantidadPedida) {
-        if(typeof +codigo !== 'number' || codigo < 0 || codigo.trim() === '') {
+    isCamposValidosCarritoDeCompras(codigo, cantidadTotal, cantidadPedida) {
+        if (typeof +codigo !== 'number' || codigo < 0 || codigo.trim() === '') {
             throw new Excepciones.ErrorDeValidacion('El código del producto debe ser un número positivo.');
         }
         if (!this.hashMapProductos.has(codigo)) {
@@ -372,59 +372,84 @@ export default class Tienda {
      * @returns 
      */
     realizarVenta(codigoVenta, idCliente, fecha) {
-        // Verificar si el código de venta ya esta en la lista de ventas
-        if (this.listaVentas.some(venta => venta.codigo === codigoVenta)) {
-            alert(`El código de venta "${codigoVenta}" ya está en uso.`);
-            return;
-        }
+        let cliente = this.hashMapClientes.get(idCliente);
+        let carritoCompras = this.getCarritoComprasCliente(idCliente);
+        try {
+            if (this.isCamposValidosVenta(codigoVenta, idCliente, fecha)) {
+                logExito("Venta: Campos validos");
 
-        // Encontrar el cliente
-        const cliente = this.hashMapClientes.get(idCliente);
-        if (!cliente) {
-            alert(`El cliente con ID "${idCliente}" no existe.`);
-            return;
-        }
+                // Crear los detalles de la venta
+                const detallesVenta = [];
+                for (const [codigoProducto, cantidad] of carritoCompras) {
+                    const producto = this.hashMapProductos.get(codigoProducto);
+                    //console.log('precio:', producto.precio); // Log precio
+                    //console.log('cantidad:', cantidad.cantidad); // Log cantidad
+                    const subtotal = cantidad.cantidad * producto.precio;
+                    const detalleVenta = new DetalleVenta(producto, cantidad, subtotal);
+                    detallesVenta.push(detalleVenta);
+                }
 
-        // Obtener el carrito de compras del cliente
-        const carritoCompras = this.getCarritoComprasCliente(idCliente);
-        if (!carritoCompras) {
-            alert(`No se pudo obtener el carrito de compras del cliente con ID "${idCliente}".`);
-            return;
-        }
+                // Calcular el total de la venta
+                const totalVenta = detallesVenta.reduce((total, detalle) => {
+                    logExito('subtotal:', detalle.subtotal); // Log subtotal
+                    return total + detalle.subtotal;
+                }, 0);
 
-        // Crear los detalles de la venta
-        const detallesVenta = [];
-        for (const [producto, cantidad] of carritoCompras) {
-            if (cantidad > producto.cantidad) {
-                alert(`La cantidad solicitada de "${producto.nombre}" excede la cantidad disponible en el inventario.`);
-                return;
+                // Crear la venta
+                const venta = new Venta(codigoVenta, fecha, totalVenta, cliente, detallesVenta);
+                logExito(venta.listaDetalles);
+
+                // Agregar la venta a la lista de ventas de la tienda
+                this.listaVentas.push(venta);
+
+                //Agrega la venta a la linkedList (Esta la ordena sola)
+                this.historialVentas.insertInOrder(venta);
+
+                // Actualizar la cantidad de productos en el inventario
+                for (const [codigoProducto, cantidad] of carritoCompras) {
+                    const producto = this.hashMapProductos.get(codigoProducto);
+                    console.log('producto.cantidad before:', producto.cantidad); // Log producto.cantidad before
+                    console.log('cantidad:', cantidad.cantidad); // Log cantidad
+                    producto.cantidad -= cantidad.cantidad;
+                    console.log('producto.cantidad after:', producto.cantidad); // Log producto.cantidad after
+                }
+                cliente.vaciarCarrito();
+
             }
-            const subtotal = cantidad * producto.precio;
-            const detalleVenta = new DetalleVenta(producto, cantidad, subtotal);
-            detallesVenta.push(detalleVenta);
+            return 'exito';
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
-
-        // Calcular el total de la venta
-        const totalVenta = detallesVenta.reduce((total, detalle) => total + detalle.subtotal, 0);
-
-        // Crear la venta
-        const venta = new Venta(codigoVenta, fecha, totalVenta, cliente, detallesVenta);
-        console.log(venta.listaDetalles);
-
-        // Agregar la venta a la lista de ventas de la tienda
-        this.listaVentas.push(venta);
-
-        //Agrega la venta a la linkedList (Esta la ordena sola)
-        this.historialVentas.insertInOrder(venta);
-
-        // Actualizar la cantidad de productos en el inventario
-        for (const [producto, cantidad] of carritoCompras) {
-            producto.cantidad -= cantidad;
-        }
-        cliente.vaciarCarrito();
-
-        alert('Venta realizada con éxito:', venta.codigo);
     }
+
+    isCamposValidosVenta(codigoVenta, idCliente, fecha) {
+
+        if (typeof +codigoVenta !== 'number' || codigoVenta < 0 || codigoVenta.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('El código de venta debe ser un número positivo.');
+        }
+        if (this.listaVentas.some(venta => venta.codigo === codigoVenta)) {
+            throw new Excepciones.ErrorDeValidacion(`El código de venta "${codigoVenta}" ya está en uso.`);
+        }
+        if (!this.hashMapClientes.has(idCliente)) {
+            throw new Excepciones.ErrorDeValidacion(`El cliente con ID "${idCliente}" no existe.`);
+        }
+        if (!this.getCarritoComprasCliente(idCliente)) {
+            throw new Excepciones.ErrorDeValidacion(`No se pudo obtener el carrito de compras del cliente con ID "${idCliente}".`);
+        }
+        if (this.getCarritoComprasCliente(idCliente).size === 0) {
+            throw new Excepciones.ErrorDeValidacion(`El carrito de compras del cliente con ID "${idCliente}" está vacío.`);
+        }
+        if (typeof +idCliente !== 'number' || idCliente < 0 || idCliente.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La identificación del cliente debe ser un número positivo.');
+        }
+        if (typeof fecha !== 'string' || fecha.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('Por favor seleccione una fecha');
+        }
+        return 'exito';
+    }
+
+
 
     /**
      * Elimina una venta de la tienda dado si codigo
@@ -435,25 +460,21 @@ export default class Tienda {
         // Buscar la venta en la lista de ventas
         const ventaIndex = this.listaVentas.findIndex(venta => venta.codigo === codigoVenta);
         if (ventaIndex === -1) {
-            alert(`No se encontró ninguna venta con el código ${codigoVenta}.`);
-            return;
+            throw new Excepciones.EstadoVenta(`No se encontró ninguna venta con el código ${codigoVenta}.`);
         }
-
         // Obtener la venta a eliminar
-        const ventaEliminada = this.listaVentas[ventaIndex];
-
+        const ventaEliminada = this.listaVentas[ventaIndex]
         // Restablecer la cantidad de productos en el inventario
         ventaEliminada.listaDetalles.forEach(detalle => {
-            detalle.producto.cantidad += detalle.cantidad;
+            const producto = this.hashMapProductos.get(detalle.producto);
+            producto.cantidad += detalle.cantidad;
         });
-
         // Eliminar la venta de la lista de ventas
         this.listaVentas.splice(ventaIndex, 1);
-
         // Eliminar la venta de la linkedList de historial de ventas
         this.historialVentas.deleteVenta(codigoVenta);
 
-        alert(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
+        return 'exito';
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
