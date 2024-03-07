@@ -910,7 +910,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fila.appendChild(nombreCell);
 
             const cantidadCell = document.createElement('td');
-            cantidadCell.textContent = detalle.cantidad;
+            cantidadCell.textContent = detalle.cantidad.cantidad;
             fila.appendChild(cantidadCell);
 
             const subtotalCell = document.createElement('td');
