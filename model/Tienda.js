@@ -3,6 +3,11 @@ import Producto from './Producto.js';
 import Venta from './Venta.js';
 import DetalleVenta from './DetalleVenta.js';
 import LinkedList from './LinkedList.js';
+import * as Excepciones from './utils/Excepciones.js';
+import { logError, logExito } from './utils/logger.js';
+
+
+
 
 export default class Tienda {
 
@@ -22,7 +27,7 @@ export default class Tienda {
         this.nombre = nombre;
         this.direccion = direccion;
         this.hashMapProductos = new Map(); //Se inicializa un hashMap con new Map().  Se puede usar un objeto {} Pero Map es mas eficiente.
-        this.hashMapClientes = new Map(); 
+        this.hashMapClientes = new Map();
         this.listaVentas = []; //Se inicialzia una lista con [], es muy similar a un arraylist en Java. 
         this.historialVentas = new LinkedList();
 
@@ -138,46 +143,43 @@ export default class Tienda {
         alert('hello world');
     }
 
-    /* Registra un cliente siempre y cuando su id no exista
+    /* Registra un cliente siempre verificando que la identificación no exista en el hashMap de clientes.
+    Retorna true si se pudo registrar el cliente, false en caso contrario. 
+    Creo que la sintáxis de la función puede mejorar pero me adapté a la forma en que se estaba haciendo :skull:- Daniel.
     * @param {*} identificacion 
     * @param {*} nombre 
     * @param {*} direccion 
     */
     registrarCliente(identificacion, nombre, direccion) {
-        if (this.isCamposValidosCliente(identificacion, nombre, direccion)) {
-            if (this.hashMapClientes.has(identificacion)) {
-                alert("El cliente con identificacion " + identificacion + " ya está registrado")
-            } else {
+
+        try {
+            if (this.isCamposValidosCliente(identificacion, nombre, direccion) || !this.hashMapClientes.has(identificacion)) {
+
+                logExito("Registro Cliente: Campos validos y no existe el cliente.")
                 const cliente = new Cliente(identificacion, nombre, direccion);
-                this.hashMapClientes.set(identificacion, cliente); 
-                alert("Cliente registrado con éxito");
-                //Imprimir el hashMap de clientes para verificar si se registro correctamente
-                console.log("Se registró el cliente:");
+                this.hashMapClientes.set(identificacion, cliente);
                 this.imprimirClientes();
-                //Serializo los clientes
-                const clientesSerializados = this.serializarClientes();
-                localStorage.setItem('clientes', clientesSerializados);
-            }        
-        } else {
-            alert("Por favor asegurese de que los campos de cliente esten llenos");
+            }
+            return 'exito';
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
-   /**
-    * Elimina un cliente del hashMap de clientes dado su id
-    * @param {*} idCliente 
-    */
+    /**
+     * Elimina un cliente del hashMap de clientes dado su id
+     * @param {*} idCliente 
+     */
     eliminarCliente(idCliente) {
-        // Verifica si el cliente existe en el Map
+        // Verifica si el cliente existe en el Map. 
+        //No es necesario verificar si existe o no ya que hay que elegirlo para eliminarlo, de todas maneras se deja - Daniel.
         if (this.hashMapClientes.has(idCliente)) {
             this.hashMapClientes.delete(idCliente);
             this.imprimirClientes();
-            alert(`Cliente con identificación ${idCliente} eliminado.`);
-            //Serializo los clientes
-            const clientesSerializados = this.serializarClientes();
-            localStorage.setItem('clientes', clientesSerializados);
+            return 'exito'
         } else {
-            alert(`El cliente con identificación ${idCliente} no existe.`);
+            throw new Excepciones.EstadoCliente(`El cliente con identificación ${idCliente} no existe.`);
         }
     }
 
@@ -188,41 +190,69 @@ export default class Tienda {
      * @param {*} nuevaDireccion 
      */
     actualizarCliente(identificacion, nuevoNombre, nuevaDireccion) {
-        if (this.isCamposValidosCliente(identificacion, nuevoNombre, nuevaDireccion)) {
-            if (this.hashMapClientes.has(identificacion)) {
-                const cliente = this.hashMapClientes.get(identificacion);
-                cliente.setNombre(nuevoNombre);
-                cliente.setDireccion(nuevaDireccion);
-                alert(`Cliente con identificación ${identificacion} actualizado.`);
-                //Serializo los clientes
-                const clientesSerializados = this.serializarClientes();
-                localStorage.setItem('clientes', clientesSerializados);
-            } else {
-                alert(`El cliente con identificación ${identificacion} no existe.`);
+
+        try {
+            if (this.isCamposValidosActualizacionCliente(nuevoNombre, nuevaDireccion)) {
+                if (this.hashMapClientes.has(identificacion)) {
+                    const cliente = this.hashMapClientes.get(identificacion);
+                    cliente.setNombre(nuevoNombre);
+                    cliente.setDireccion(nuevaDireccion);
+                }
+                return 'exito';
             }
-        } else {
-            alert("Por favor asegurese de que los campos de cliente esten llenos");
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
     /**
-     * Verifica que los campos para la manipulacion de clientes no esten vacios
+     * Verifica que los campos para la manipulacion de clientes no estén vacios
      * @param {*} identificacion 
      * @param {*} nombre 
      * @param {*} direccion 
      * @returns 
      */
     isCamposValidosCliente(identificacion, nombre, direccion) {
-        if (!identificacion || !nombre || !direccion) {
-            return false;
-        } else {
-            return true;
-        } 
+
+        if (this.hashMapClientes.has(identificacion)) {
+            throw new Excepciones.ErrorDeValidacion('El cliente ya está registrado en la tienda.');
+        }
+        if (typeof +identificacion !== 'number' || identificacion < 0 || identificacion.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La identificación debe ser un número entero positivo.');
+        }
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof direccion !== 'string' || direccion.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
+        }
+        return true;
     }
 
-   /**
-    * Imprime el hashMap de clientes
-    */
+    /**
+     * Función para verificar los campos de texto cuando se quiere actualizar un cliente, es distinta a la de registro ya que no se verifica la identificación para evitar ambigüedades. Perdón dios.
+     * @param {*} nombre 
+     * @param {*} direccion 
+     * @returns 
+     */
+    isCamposValidosActualizacionCliente(nombre, direccion) {
+
+        let flag = true;
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof direccion !== 'string' || direccion.trim() === '') {
+            flag = false
+            throw new Excepciones.ErrorDeValidacion('La dirección no puede estar vacía o debe ser una cadena de texto');
+        }
+        return flag;
+    }
+
+    /**
+     * Imprime el hashMap de clientes
+     */
     imprimirClientes() {
         this.hashMapClientes.forEach((cliente) => {
             console.log(cliente.toString());
@@ -239,22 +269,21 @@ export default class Tienda {
      * @param {*} cantidad 
      */
     registrarProducto(codigo, nombre, precio, cantidad) {
-        if (this.isCamposValidosProducto(codigo, nombre, precio, cantidad)) {
-            if (this.hashMapProductos.has(codigo)) {
-                alert("El producto con el codigo " + codigo + " ya está registrado");
-            } else {
+        try {
+            if (this.isCamposValidosProducto(codigo, nombre, precio, cantidad) || !this.hashMapProductos.has(codigo)) {
+                logExito("Se registró el producto con codigo: " + codigo)
                 const producto = new Producto(codigo, nombre, precio, cantidad);
                 this.hashMapProductos.set(codigo, producto);
-                alert("Producto registrado con éxito");
                 //Imprimir el hashMap de productos para verificar si se registro correctamente
-                console.log("Se registró el producto")
                 this.imprimirProductos();
                 //Serializo los productos
                 const productiosSerializados = this.serializarProductos();
                 localStorage.setItem('productos', productiosSerializados);
             }
-        } else {
-            alert("Por favor asegurese de que los campos del producto esten llenos");
+            return 'exito';
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
@@ -266,12 +295,10 @@ export default class Tienda {
         if (this.hashMapProductos.has(codigoProducto)) {
             this.hashMapProductos.delete(codigoProducto);
             this.imprimirProductos();
-            alert(`Producto con código ${codigoProducto} eliminado.`);
-            //Serializo los productos
-            const productiosSerializados = this.serializarProductos();
-            localStorage.setItem('productos', productiosSerializados);
+            return 'exito';
         } else {
-            alert(`Producto con código ${codigoProducto} no existe.`);
+            //alert(`Producto con código ${codigoProducto} no existe.`);
+            throw new Excepciones.EstadoProducto(`Producto con código ${codigoProducto} no existe.`);
         }
     }
 
@@ -283,21 +310,20 @@ export default class Tienda {
      * @param {*} nuevaCantidad 
      */
     actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
-        if (this.isCamposValidosProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad)) {
-            if (this.hashMapProductos.has(codigo)) {
-                const producto = this.hashMapProductos.get(codigo);
-                producto.setNombre(nuevoNombre);
-                producto.setPrecio(nuevoPrecio);
-                producto.setCantidad(nuevaCantidad);
-                alert(`Producto con código ${codigo} actualizado.`);
-                //Serializo los productos
-                const productiosSerializados = this.serializarProductos();
-                localStorage.setItem('productos', productiosSerializados);
-            } else {
-                alert(`El producto con código ${codigo} no existe.`);
+
+        try {
+            if (this.isCamposValidosActualizacionProducto(nuevoNombre, nuevoPrecio, nuevaCantidad)) {
+                if (this.hashMapProductos.has(codigo)) {
+                    const producto = this.hashMapProductos.get(codigo);
+                    producto.setNombre(nuevoNombre);
+                    producto.setPrecio(nuevoPrecio);
+                    producto.setCantidad(nuevaCantidad);
+                }
+                return 'exito';
             }
-        } else {
-            alert("Por favor asegurese de que los campos de producto esten llenos");
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
     }
 
@@ -310,12 +336,43 @@ export default class Tienda {
      * @returns 
      */
     isCamposValidosProducto(codigo, nombre, precio, cantidad) {
-        if (!codigo || !nombre || !precio || !cantidad) {
-            return false;
-        } else {
-            return true;
+
+        if (this.hashMapProductos.has(codigo)) {
+            throw new Excepciones.ErrorDeValidacion('Un producto con ese codigo ya existe.');
         }
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof codigo !== 'string' || codigo.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('El código no puede estar vacío o debe ser una cadena de texto');
+        }
+        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('El precio debe ser un número positivo.');
+        }
+        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
+        }
+        return true;
     }
+
+
+    isCamposValidosActualizacionProducto(nombre, precio, cantidad) {
+        let flag = true;
+        if (!/^[a-zA-Z-' ]+$/.test(nombre)) {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El nombre solo puede contener carácteres del alfabeto y espacios.');
+        }
+        if (typeof +precio !== 'number' || precio < 0 || precio.trim() === '') {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('El precio debe ser un número positivo.');
+        }
+        if (typeof +cantidad !== 'number' || cantidad < 0 || cantidad.trim() === '') {
+            flag = false;
+            throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
+        }
+        return flag;
+    }
+
 
     /**
      * Imprime el hashMap de productos
@@ -337,10 +394,8 @@ export default class Tienda {
         const cliente = this.hashMapClientes.get(identificacion);
         if (cliente) {
             return cliente.getCarritoCompras();
-        } else {
-            alert("La identificación ingresada no existe en la tienda.")
-            return null;
         }
+        return 'fallido';
     }
 
     /**
@@ -349,16 +404,25 @@ export default class Tienda {
      * @param {*} codigoProducto 
      * @param {*} cantidadProducto 
      */
-    agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto) {
-        const carritoCompras = this.getCarritoComprasCliente(idCliente);
-        const producto = this.hashMapProductos.get(codigoProducto);
-        //Revisa si el producto existe
-        if (producto) {
-            carritoCompras.set(producto, cantidadProducto);
-            alert(`Se agregaron ${cantidadProducto} unidades de ${producto.nombre} al carrito.`)
-        } else {
-            alert('Codigo del producto no valido');
+    agregarProductoCarrito(idCliente, codigoProducto, cantidadPedidaProducto) {
+        let carritoCompras = this.getCarritoComprasCliente(idCliente);
+        console.log(carritoCompras);
+
+        //Operador ternario para obtener la cantidad de un producto. Si no existe, se le asigna 0.
+        let cantidadProducto = (this.hashMapProductos.has(codigoProducto)) ? this.hashMapProductos.get(codigoProducto).cantidad : 0;
+        console.log(cantidadProducto);
+        //Se validan los campos. Tambien se revisa si el producto existe y si hay suficiente cantidad en el inventario
+        try {
+            this.isCamposValidosCarritoDeCompras(codigoProducto, cantidadProducto, cantidadPedidaProducto);
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
+        let producto = this.hashMapProductos.get(codigoProducto);
+        let productoAlCarrito = new Producto(producto.codigo, producto.nombre, producto.precio, cantidadPedidaProducto);
+        carritoCompras.set(codigoProducto, productoAlCarrito); //Se agrega el producto al carrito, no es lo ideal pero que quede así por ahora. Quiero vivir.
+
+        return 'exito';
     }
 
     /**
@@ -367,13 +431,27 @@ export default class Tienda {
      * @param {*} codigoProducto 
      */
     eliminarProductoCarrito(idCliente, codigoProducto) {
-        const carritoCompras = this.getCarritoComprasCliente(idCliente);
-        const producto = this.hashMapProductos.get(codigoProducto);
-        if (producto && carritoCompras.has(producto)) {
-            carritoCompras.delete(producto);
-            alert(`El producto ${producto.nombre} ha sido eliminado del carrito.`);
-        } else {
-            alert('El producto no existe en el carrito.');
+        let carritoCompras = this.getCarritoComprasCliente(idCliente);
+        let producto = this.hashMapProductos.get(codigoProducto);
+        if (producto === null || producto === undefined || !carritoCompras.has(producto.codigo)) {
+            throw new Excepciones.EstadoProducto(`El producto con código ${codigoProducto} no existe en el carrito.`);
+        }
+        carritoCompras.delete(producto.codigo);
+        return 'exito';
+    }
+
+    isCamposValidosCarritoDeCompras(codigo, cantidadTotal, cantidadPedida) {
+        if (typeof +codigo !== 'number' || codigo < 0 || codigo.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('El código del producto debe ser un número positivo.');
+        }
+        if (!this.hashMapProductos.has(codigo)) {
+            throw new Excepciones.ErrorDeValidacion('No existe un producto con ese codigo.');
+        }
+        if (typeof +cantidadPedida !== 'number' || cantidadPedida < 0 || cantidadPedida.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La cantidad debe ser un número positivo.');
+        }
+        if (+cantidadTotal < +cantidadPedida) {
+            throw new Excepciones.EstadoProducto(`La cantidad solicitada excede la cantidad disponible en el inventario.`);
         }
     }
 
@@ -387,69 +465,84 @@ export default class Tienda {
      * @returns 
      */
     realizarVenta(codigoVenta, idCliente, fecha) {
-        // Verificar si el código de venta ya esta en la lista de ventas
-        if (this.listaVentas.some(venta => venta.codigo === codigoVenta)) {
-            alert(`El código de venta "${codigoVenta}" ya está en uso.`);
-            return;
-        }
+        let cliente = this.hashMapClientes.get(idCliente);
+        let carritoCompras = this.getCarritoComprasCliente(idCliente);
+        try {
+            if (this.isCamposValidosVenta(codigoVenta, idCliente, fecha)) {
+                logExito("Venta: Campos validos");
 
-        // Encontrar el cliente
-        const cliente = this.hashMapClientes.get(idCliente);
-        if (!cliente) {
-            alert(`El cliente con ID "${idCliente}" no existe.`);
-            return;
-        }
+                // Crear los detalles de la venta
+                const detallesVenta = [];
+                for (const [codigoProducto, cantidad] of carritoCompras) {
+                    const producto = this.hashMapProductos.get(codigoProducto);
+                    //console.log('precio:', producto.precio); // Log precio
+                    //console.log('cantidad:', cantidad.cantidad); // Log cantidad
+                    const subtotal = cantidad.cantidad * producto.precio;
+                    const detalleVenta = new DetalleVenta(producto, cantidad, subtotal);
+                    detallesVenta.push(detalleVenta);
+                }
 
-        // Obtener el carrito de compras del cliente
-        const carritoCompras = this.getCarritoComprasCliente(idCliente);
-        if (!carritoCompras) {
-            alert(`No se pudo obtener el carrito de compras del cliente con ID "${idCliente}".`);
-            return;
-        }
+                // Calcular el total de la venta
+                const totalVenta = detallesVenta.reduce((total, detalle) => {
+                    logExito('subtotal:', detalle.subtotal); // Log subtotal
+                    return total + detalle.subtotal;
+                }, 0);
 
-        // Crear los detalles de la venta
-        const detallesVenta = [];
-        for (const [producto, cantidad] of carritoCompras) {
-            if (cantidad > producto.cantidad) {
-                alert(`La cantidad solicitada de "${producto.nombre}" excede la cantidad disponible en el inventario.`);
-                return;
+                // Crear la venta
+                const venta = new Venta(codigoVenta, fecha, totalVenta, cliente, detallesVenta);
+                logExito(venta.listaDetalles);
+
+                // Agregar la venta a la lista de ventas de la tienda
+                this.listaVentas.push(venta);
+
+                //Agrega la venta a la linkedList (Esta la ordena sola)
+                this.historialVentas.insertInOrder(venta);
+
+                // Actualizar la cantidad de productos en el inventario
+                for (const [codigoProducto, cantidad] of carritoCompras) {
+                    const producto = this.hashMapProductos.get(codigoProducto);
+                    console.log('producto.cantidad before:', producto.cantidad); // Log producto.cantidad before
+                    console.log('cantidad:', cantidad.cantidad); // Log cantidad
+                    producto.cantidad -= cantidad.cantidad;
+                    console.log('producto.cantidad after:', producto.cantidad); // Log producto.cantidad after
+                }
+                cliente.vaciarCarrito();
+
             }
-            const subtotal = cantidad * producto.precio;
-            const detalleVenta = new DetalleVenta(producto, cantidad, subtotal);
-            detallesVenta.push(detalleVenta);
+            return 'exito';
+        } catch (error) {
+            logError(error.message);
+            return error.message;
         }
-
-        // Calcular el total de la venta
-        const totalVenta = detallesVenta.reduce((total, detalle) => total + detalle.subtotal, 0);
-
-        // Crear la venta
-        const venta = new Venta(codigoVenta, fecha, totalVenta, cliente, detallesVenta);
-        console.log(venta.listaDetalles);
-
-        // Agregar la venta a la lista de ventas de la tienda
-        this.listaVentas.push(venta);
-
-        //Agrega la venta a la linkedList (Esta la ordena sola)
-        this.historialVentas.insertInOrder(venta);
-
-        // Actualizar la cantidad de productos en el inventario
-        for (const [producto, cantidad] of carritoCompras) {
-            producto.cantidad -= cantidad;
-        }
-        cliente.vaciarCarrito();
-
-        alert('Venta realizada con éxito:', venta.codigo);
-
-        //Serializo las ventas
-        const ventasSerializadas = this.serializarVentas();
-        localStorage.setItem('ventas', ventasSerializadas);
-        //Serializo los productos
-        const productiosSerializados = this.serializarProductos();
-        localStorage.setItem('productos', productiosSerializados);
-        //Serializo el historial
-        const historialSerializados = this.serializarHistorialVentas();
-        localStorage.setItem('historial', historialSerializados);
     }
+
+    isCamposValidosVenta(codigoVenta, idCliente, fecha) {
+
+        if (typeof +codigoVenta !== 'number' || codigoVenta < 0 || codigoVenta.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('El código de venta debe ser un número positivo.');
+        }
+        if (this.listaVentas.some(venta => venta.codigo === codigoVenta)) {
+            throw new Excepciones.ErrorDeValidacion(`El código de venta "${codigoVenta}" ya está en uso.`);
+        }
+        if (!this.hashMapClientes.has(idCliente)) {
+            throw new Excepciones.ErrorDeValidacion(`El cliente con ID "${idCliente}" no existe.`);
+        }
+        if (!this.getCarritoComprasCliente(idCliente)) {
+            throw new Excepciones.ErrorDeValidacion(`No se pudo obtener el carrito de compras del cliente con ID "${idCliente}".`);
+        }
+        if (this.getCarritoComprasCliente(idCliente).size === 0) {
+            throw new Excepciones.ErrorDeValidacion(`El carrito de compras del cliente con ID "${idCliente}" está vacío.`);
+        }
+        if (typeof +idCliente !== 'number' || idCliente < 0 || idCliente.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('La identificación del cliente debe ser un número positivo.');
+        }
+        if (typeof fecha !== 'string' || fecha.trim() === '') {
+            throw new Excepciones.ErrorDeValidacion('Por favor seleccione una fecha');
+        }
+        return 'exito';
+    }
+
+
 
     /**
      * Elimina una venta de la tienda dado si codigo
@@ -460,38 +553,25 @@ export default class Tienda {
         // Buscar la venta en la lista de ventas
         const ventaIndex = this.listaVentas.findIndex(venta => venta.codigo === codigoVenta);
         if (ventaIndex === -1) {
-            alert(`No se encontró ninguna venta con el código ${codigoVenta}.`);
-            return;
+            throw new Excepciones.EstadoVenta(`No se encontró ninguna venta con el código ${codigoVenta}.`);
         }
-
         // Obtener la venta a eliminar
-        const ventaEliminada = this.listaVentas[ventaIndex];
-
+        const ventaEliminada = this.listaVentas[ventaIndex]
         // Restablecer la cantidad de productos en el inventario
         ventaEliminada.listaDetalles.forEach(detalle => {
-            detalle.producto.cantidad += detalle.cantidad;
+            const producto = this.hashMapProductos.get(detalle.producto);
+            producto.cantidad += detalle.cantidad;
         });
-
         // Eliminar la venta de la lista de ventas
         this.listaVentas.splice(ventaIndex, 1);
-
         // Eliminar la venta de la linkedList de historial de ventas
         this.historialVentas.deleteVenta(codigoVenta);
 
-        alert(`La venta con el código ${codigoVenta} ha sido eliminada correctamente.`);
-
-        //Serializo las ventas
-        const ventasSerializadas = this.serializarVentas();
-        localStorage.setItem('ventas', ventasSerializadas);
-        //Serializo los productos
-        const productiosSerializados = this.serializarProductos();
-        localStorage.setItem('productos', productiosSerializados);
-        //Serializo el historial
-        const historialSerializados = this.serializarHistorialVentas();
-        localStorage.setItem('historial', historialSerializados);
+        return 'exito';
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
+
 
     /**
      * Obtiene los productos (hashMap) y los convierte a una lista que ordena dependiendo de la cantidad

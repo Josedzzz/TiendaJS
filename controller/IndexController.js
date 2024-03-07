@@ -1,6 +1,8 @@
 import Tienda from "../model/Tienda.js";
+import { logExito } from "../model/utils/logger.js";
+import * as sweetAlert from "../model/utils/sweetAlert.js";
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Crear una instancia de la clase Tienda
     const tienda = new Tienda("TiendaJS", "Quimbaya");
     tienda.test();
@@ -53,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    /*
+    * Muestra el formulario correspondiente y oculta los demas.*/
     const mostrarFormulario = (formId) => {
         //Muestra el formulario
         const form = document.getElementById(formId);
@@ -69,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     links.forEach(link => {
         link.addEventListener("click", handleLinkClick);
     });
-    
+
     //MANEJO DE LA VENTANA DE CLIENTES ---------------------------------------------------------------
 
     //Variables auxiliares para la ventana
@@ -77,18 +81,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRegistrarCliente = document.getElementById('subir');
     const btnEliminarCliente = document.getElementById('btnEliminarCliente');
     const btnActualizarCliente = document.getElementById('btnActualizarCliente');
-    const tablaClientes = document.getElementById('tablaClientes');    
+    const tablaClientes = document.getElementById('tablaClientes');
     let clienteSeleccionado = null;
+    let campoIdentificacionCliente = document.getElementById('identificacion');
+    let campoNombreCliente = document.getElementById('nombre');
+    let campoDireccionCliente = document.getElementById('direccion');
 
     //Funcion para mostrar los clientes actuales de la tienda
     function mostrarClientes() {
         // Limpia la tabla antes de actualizarla
         tablaClientes.innerHTML = '';
-    
+
         // Crear la tabla
         const tabla = document.createElement('table');
         tabla.classList.add('tabla-clientes');
-    
+
         // Encabezado de la tabla
         const encabezados = ['Identificación', 'Nombre', 'Dirección'];
         const encabezadosRow = document.createElement('tr');
@@ -98,37 +105,37 @@ document.addEventListener('DOMContentLoaded', function() {
             encabezadosRow.appendChild(th);
         });
         tabla.appendChild(encabezadosRow);
-    
+
         // Obtener el HashMap de clientes y convertirlo en un array
         const hashMapClientes = tienda.getClientes();
         const clientesArray = Array.from(hashMapClientes.values());
-    
+
         // Filas de clientes
         clientesArray.forEach(cliente => {
             const fila = document.createElement('tr');
             fila.classList.add('fila-cliente'); // Agregar clase para la fila
-    
+
             const identificacionCell = document.createElement('td');
             identificacionCell.textContent = cliente.identificacion;
             fila.appendChild(identificacionCell);
-    
+
             const nombreCell = document.createElement('td');
             nombreCell.textContent = cliente.nombre;
             fila.appendChild(nombreCell);
-    
+
             const direccionCell = document.createElement('td');
             direccionCell.textContent = cliente.direccion;
             fila.appendChild(direccionCell);
-    
+
             tabla.appendChild(fila);
         });
-    
+
         // Agregar la tabla al contenedor
         tablaClientes.appendChild(tabla);
     }
 
     // Asociar un evento de clic a las filas de la tabla de clientes
-    tablaClientes.addEventListener('click', function(event) {
+    tablaClientes.addEventListener('click', function (event) {
         // Obtener la fila en la que se hizo clic
         const filaCliente = event.target.closest('tr');
         if (!filaCliente) return; // Salir si no se hizo clic en una fila
@@ -142,43 +149,63 @@ document.addEventListener('DOMContentLoaded', function() {
         // Agregar la clase 'seleccionado' a la fila actual
         filaCliente.classList.add('seleccionado');
 
-        // Actualizo clienteSeleccionado
+        // Actualizo clienteSeleccionado y muestro la información del cliente en el formulario, para que el usuario pueda actualizarla.
         clienteSeleccionado = filaCliente.cells[0].textContent;
-    });
-    
 
+        //Muestro la información del cliente en el formulario
+        campoIdentificacionCliente.value = filaCliente.cells[0].textContent;
+        campoNombreCliente.value = filaCliente.cells[1].textContent;
+        campoDireccionCliente.value = filaCliente.cells[2].textContent;
+    });
+
+    //registrar cliente
     //Agregar un evento de click al boton de registrar cliente
-    btnRegistrarCliente.addEventListener('click', function(event) {
-        event.preventDefault(); 
+    btnRegistrarCliente.addEventListener('click', function (event) {
+        event.preventDefault();
         const identificacion = document.getElementById('identificacion').value;
         const nombre = document.getElementById('nombre').value;
         const direccion = document.getElementById('direccion').value;
-        registrarCliente(identificacion, nombre, direccion);
-        //Limpiar los campos del formulario (opcional)
-        formCliente.reset();
+        let resultadoRegistroCliente = registrarCliente(identificacion, nombre, direccion);
+
+        //Limpiar los campos del formulario si hubo un registro exitoso. 
+        if (resultadoRegistroCliente === 'exito') {
+            sweetAlert.mostrarPopupExito('Cliente registrado exitosamente.');
+            formCliente.reset();
+        } else {
+            sweetAlert.mostrarPopupError(resultadoRegistroCliente)
+        }
     });
-    
+
     /**
-     * Llama a la tienda para registrar un cliente
+     * Llama a la tienda para registrar un cliente y asigna una variable bandera para verificar si se registro correctamente.
      * @param {*} identificacion 
      * @param {*} nombre 
      * @param {*} direccion 
      */
     function registrarCliente(identificacion, nombre, direccion) {
-        tienda.registrarCliente(identificacion, nombre, direccion);
-        //Actualizo la tabla
+        let flag = tienda.registrarCliente(identificacion, nombre, direccion);
+        //Actualizo la tabla.
         mostrarClientes();
+        return flag;
     }
 
+    //Eliminar cliente
     //Asociar un evento al boton de eliminar cliente
-    btnEliminarCliente.addEventListener('click', function() {
+    btnEliminarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
-            alert('Por favor selecciona un cliente en la tabla.');
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un cliente de la tabla para poder eliminarlo.');
             return;
         }
         const idCliente = clienteSeleccionado;
-        eliminarCliente(idCliente);
-        clienteSeleccionado = null;
+        let resultadoEliminacionCliente = eliminarCliente(idCliente);
+        if (resultadoEliminacionCliente === 'exito') {
+            sweetAlert.mostrarPopupExito('Cliente eliminado exitosamente.');
+            clienteSeleccionado = null;
+            formCliente.reset();
+        } else {
+            //Mostrar un mensaje de error. No llega acá por el simple hecho de que el cliente seleccionado tiene que ser seleccionado. Igual se deja por si acaso. - Daniel
+            sweetAlert.mostrarPopupError(resultadoEliminacionCliente);
+        }
     });
 
     /**
@@ -186,22 +213,32 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} idCliente 
      */
     function eliminarCliente(idCliente) {
-        tienda.eliminarCliente(idCliente);
+        let resultadoEliminacion = tienda.eliminarCliente(idCliente);
         //Actualizo la tabla
         mostrarClientes();
+        return resultadoEliminacion;
     }
 
-    //Se asocia un evento al boton de actualizar cliente
-    btnActualizarCliente.addEventListener('click', function() {
+    //Se asocia un evento al botón para actualizar la información de un cliente a excepción de su identificación.
+    btnActualizarCliente.addEventListener('click', function () {
         if (!clienteSeleccionado) {
-            alert('Por favor seleccione un cliente en la tabla.');
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un cliente de la tabla para poder actualizarlo.');
             return;
         }
         const idCliente = clienteSeleccionado;
         const nuevoNombre = document.getElementById('nombre').value;
         const nuevaDireccion = document.getElementById('direccion').value;
-        actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
-        formCliente.reset();
+        campoIdentificacionCliente.ariaReadOnly = true; //No se puede cambiar la identificación del cliente, igual no sirve por que deja cambiarlo jaja. - Daniel
+        //campoIdentificacionCliente.value = clienteSeleccionado;
+        let resultadoActualizacionCliente = actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+
+        if (resultadoActualizacionCliente === 'exito') {
+            sweetAlert.mostrarPopupExito('Cliente actualizado exitosamente.');
+            clienteSeleccionado = null;
+            formCliente.reset();
+        } else {
+            sweetAlert.mostrarPopupError(resultadoActualizacionCliente);
+        }
     });
 
     /**
@@ -211,9 +248,10 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} nuevaDireccion 
      */
     function actualizarCliente(idCliente, nuevoNombre, nuevaDireccion) {
-        tienda.actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
+        let resultadoActualizacion = tienda.actualizarCliente(idCliente, nuevoNombre, nuevaDireccion);
         //Actualizo la tabla 
         mostrarClientes();
+        return resultadoActualizacion;
     }
 
     //MANEJO DE LA VENTANA DE PRODUCTOS -------------------------------------------------------------
@@ -225,6 +263,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnActualizarProducto = document.getElementById('btnActualizarProducto');
     const tablaProductos = document.getElementById('tablaProductos');
     let productoSeleccionado = null;
+    let campoNombreProducto = document.getElementById('nombre-producto');
+    let campoCodigoProducto = document.getElementById('codigo-producto');
+    let campoPrecioProducto = document.getElementById('precio-producto');
+    let campoCantidadProducto = document.getElementById('cantidad-producto');
 
     //Funcion para mostrar los productos actuales de la tienda
     function mostrarProductos() {
@@ -278,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento click a las filas de la tabla de productos
-    tablaProductos.addEventListener('click', function(event) {
+    tablaProductos.addEventListener('click', function (event) {
         //Obtener la fila en la que se hizo click
         const filaProducto = event.target.closest('tr');
         if (!filaProducto) return; //Salir si no se hizo click
@@ -294,19 +336,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Actualizo productoSeleccionado
         productoSeleccionado = filaProducto.cells[1].textContent;
-        console.log("Producto seleccionado: " + productoSeleccionado);
+
+        campoNombreProducto.value = filaProducto.cells[0].textContent;
+        campoCodigoProducto.value = filaProducto.cells[1].textContent;
+        campoPrecioProducto.value = filaProducto.cells[2].textContent;
+        campoCantidadProducto.value = filaProducto.cells[3].textContent;
     });
 
+    //registrar producto
     //Agregar un evento de click al boton de registrarProducto
-    btnRegistrarProducto.addEventListener('click', function(event) {
+    btnRegistrarProducto.addEventListener('click', function (event) {
         event.preventDefault();
         const nombreProducto = document.getElementById('nombre-producto').value;
         const codigoProducto = document.getElementById('codigo-producto').value;
         const precioProducto = document.getElementById('precio-producto').value;
-        const cantidadProducto = document.getElementById('cantidad-producto').value;
-        registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
+        const cantidadProductoRegistrado = document.getElementById('cantidad-producto').value;
+        let resultadoRegistroProducto = registrarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProductoRegistrado);
         //Limpia los campos del formulario
-        formProducto.reset();
+        if (resultadoRegistroProducto === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto registrado exitosamente.');
+            formProducto.reset();
+        } else {
+            sweetAlert.mostrarPopupError(resultadoRegistroProducto)
+        }
     });
 
     /**
@@ -317,44 +369,61 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} cantidad 
      */
     function registrarProducto(codigo, nombre, precio, cantidad) {
-        tienda.registrarProducto(codigo, nombre, precio, cantidad);
+        let flag = tienda.registrarProducto(codigo, nombre, precio, cantidad);
         //Actualizo la tabla
         mostrarProductos();
+        return flag;
     }
 
+    //Eliminar producto
     //Asociar un evento al boton de eliminar producto
-    btnEliminarProducto.addEventListener('click', function() {
+    btnEliminarProducto.addEventListener('click', function () {
         if (!productoSeleccionado) {
-            alert("Por favor seleccione un producto en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un producto de la tabla para poder eliminarlo.');
             return;
         }
         const codigoProducto = productoSeleccionado;
-        eliminarProducto(codigoProducto);
-        productoSeleccionado = null;
+        let resultadoEliminacionProducto = eliminarProducto(codigoProducto);
+        if (resultadoEliminacionProducto === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto eliminado exitosamente.');
+            productoSeleccionado = null;
+            formProducto.reset();
+        } else {
+            //De nuevo, nunca llega aca pero lo dejo por si acaso. - Daniel
+            sweetAlert.mostrarPopupError(resultadoEliminacionProducto);
+        }
     });
 
     /**
-     * Llama a la tienda para eliminar un producto dado su codigo
+     * Llama a la tienda para eliminar un producto dado su codigo. Girl thats bad for us.
      * @param {*} codigoProducto 
      */
     function eliminarProducto(codigoProducto) {
-        tienda.eliminarProducto(codigoProducto);
+        let resultadoEliminacion = tienda.eliminarProducto(codigoProducto);
         //Actualizo la tabla
         mostrarProductos();
+        return resultadoEliminacion;
     }
 
     //Asociar un evento al boton de de actualizar producto
-    btnActualizarProducto.addEventListener('click', function() {
+    btnActualizarProducto.addEventListener('click', function () {
         if (!productoSeleccionado) {
-            alert("Por favor seleccione un producto en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un producto de la tabla para poder actualizarlo.');
             return;
         }
         const codigoProducto = productoSeleccionado;
         const nombreProducto = document.getElementById('nombre-producto').value;
         const precioProducto = document.getElementById('precio-producto').value;
-        const cantidadProducto = document.getElementById('cantidad-producto').value;
-        actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProducto);
-        formProducto.reset();
+        const cantidadProductoActualizado = document.getElementById('cantidad-producto').value;
+        let resultadoActualizacionProducto = actualizarProducto(codigoProducto, nombreProducto, precioProducto, cantidadProductoActualizado);
+
+        if (resultadoActualizacionProducto === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto actualizado exitosamente.');
+            productoSeleccionado = null;
+            formProducto.reset();
+        } else {
+            sweetAlert.mostrarPopupError(resultadoActualizacionProducto);
+        }
     });
 
     /**
@@ -365,9 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} nuevaCantidad 
      */
     function actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad) {
-        tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
+        let resultadoActualizacion = tienda.actualizarProducto(codigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
         //Actualizo la tabla
         mostrarProductos();
+        return resultadoActualizacion;
     }
 
     //MANEJO DE LA VENTANA DE CARRITO -------------------------------------------------------------------
@@ -383,7 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
     //Funcion para mostrar los productos actuales en el carrito del cliente
     function mostrarProductosCarrito(identificacionCliente) {
         if (identificacionCliente === null) {
-            alert('El identificador del cliente es nulo');
+            //No new popup for you
+            sweetAlert.mostartPopupPrecaucion('El identificador del cliente es nulo');
             return;
         }
         //Limpia el carrito antes de actualizarlo
@@ -405,31 +476,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Obtener el hashMap de carrito de un cliente
         const carritoCompras = tienda.getCarritoComprasCliente(identificacionCliente);
-        if (carritoCompras === null) {
+        if (carritoCompras === 'fallido') {
+            sweetAlert.mostrarPopupError('El cliente no cuenta con un carrito de compras.');
             return;
         }
-        
+
         //Add productos a la tabla con sus cantidades
-        carritoCompras.forEach((cantidad, producto) => {
+        carritoCompras.forEach((valorActual, idCliente, producto) => {
+
             const fila = document.createElement('tr');
             fila.classList.add('fila-producto-carrito');
-        
+
             const codigoCell = document.createElement('td');
-            codigoCell.textContent = producto.codigo;
+            codigoCell.textContent = valorActual.codigo;
             fila.appendChild(codigoCell);
-        
-            const nombreCell = document.createElement('td');
-            nombreCell.textContent = producto.nombre;
+
+            const nombreCell = document.createElement('td');    
+            nombreCell.textContent = valorActual.nombre;
             fila.appendChild(nombreCell);
-        
+
             const precioCell = document.createElement('td');
-            precioCell.textContent = producto.precio;
+            precioCell.textContent = valorActual.precio;
             fila.appendChild(precioCell);
-        
+
             const cantidadCell = document.createElement('td');
-            cantidadCell.textContent = cantidad;
+            cantidadCell.textContent = valorActual.cantidad;
             fila.appendChild(cantidadCell);
-        
+
             tabla.appendChild(fila);
         });
 
@@ -438,11 +511,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento click a las filas de la tabla de productos
-    tablaProductosCarrito.addEventListener('click', function(event) {
+    tablaProductosCarrito.addEventListener('click', function (event) {
         //Obtener la fila en la que se hizo click
         const filaProducto = event.target.closest('tr');
         if (!filaProducto) return;
-
         //Elimina la clase 'seleccionado' de la fila previamente seleccionada (si existe)
         const filaSeleccionada = tablaProductosCarrito.querySelector('.seleccionado');
         if (filaSeleccionada) {
@@ -453,42 +525,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Actualizo el productoSeleccionado
         productoCarritoSeleccionado = filaProducto.cells[0].textContent;
-        console.log("Producto carrito seleccionado: " + productoCarritoSeleccionado);
+        logExito("Producto del carrito seleccionado: " + productoCarritoSeleccionado);
     });
 
-    //Agregar un evento de click al boton de agregarProducto
-    btnAgregarProductoCarrito.addEventListener('click', function(event) {
+    //Agregar un evento de click al boton de agregarProducto al carrito
+    btnAgregarProductoCarrito.addEventListener('click', function (event) {
         event.preventDefault();
         const idCliente = document.getElementById('identificacion-cliente-carrito').value;
         const codigoProducto = document.getElementById('codigo-producto-carrito').value;
-        const cantidadProducto = document.getElementById('cantidad-producto-carrito').value;
-        agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto);
+        const cantidadProductoParaCarrito = document.getElementById('cantidad-producto-carrito').value;
+        let resultadoAgregarProductoAlCarrito = agregarProductoCarrito(idCliente, codigoProducto, cantidadProductoParaCarrito);
+
+        if (resultadoAgregarProductoAlCarrito === 'exito') {
+            sweetAlert.mostrarPopupExito('Producto agregado al carrito exitosamente.');
+            formCarrito.reset();
+            document.getElementById('identificacion-cliente-carrito').value = idCliente;
+        } else {
+            sweetAlert.mostrarPopupError('Producto no agregado al carrito: ' + resultadoAgregarProductoAlCarrito);
+        }
         //Limpio los campos del formulario excepto el id del cliente
-        formCarrito.reset();
-        document.getElementById('identificacion-cliente-carrito').value = idCliente;
+
     });
 
     /**
      * Llama a la tienda para registrar un producto en el carrito de un cliente
      * @param {*} idCliente 
      * @param {*} codigoProducto 
-     * @param {*} cantidadProducto 
+     * @param {*} cantidadProductoParaCarrito 
      */
-    function agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto) {
-        tienda.agregarProductoCarrito(idCliente, codigoProducto, cantidadProducto);
+    function agregarProductoCarrito(idCliente, codigoProducto, cantidadProductoParaCarrito) {
+
+        let resultadoAgregacion = '';
+        try {
+            resultadoAgregacion = tienda.agregarProductoCarrito(idCliente, codigoProducto, cantidadProductoParaCarrito);
+            mostrarProductosCarrito(idCliente);
+        } catch (error) {
+            resultadoAgregacion = error.message;
+        }
         //Actualizo la tabla del carrito
-        mostrarProductosCarrito(idCliente);
+        return resultadoAgregacion;
     }
 
     //Asociar un evento al boton de eliminar producto del carrito
-    btnEliminarProductoCarrito.addEventListener('click', function() {
+    btnEliminarProductoCarrito.addEventListener('click', function () {
         if (!productoCarritoSeleccionado) {
-            alert("Por favor seleccione un producto en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione un producto del carrito para poder eliminarlo.');
             return;
         }
-        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value; 
+        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
         const codigoProducto = productoCarritoSeleccionado;
-        eliminarProductoCarrito(identificacionCliente, codigoProducto);
+        let resultadoEliminarProductoCarrito = eliminarProductoCarrito(identificacionCliente, codigoProducto);
+        if(resultadoEliminarProductoCarrito === 'exito'){
+            sweetAlert.mostrarPopupExito('Producto eliminado del carrito exitosamente.');
+        } else {
+            sweetAlert.mostrarPopupError('Producto no eliminado del carrito: ' + resultadoEliminarProductoCarrito);
+        }
         productoCarritoSeleccionado = null;
     });
 
@@ -498,16 +589,23 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} codigoProducto 
      */
     function eliminarProductoCarrito(idCliente, codigoProducto) {
-        tienda.eliminarProductoCarrito(idCliente, codigoProducto);
-        //Actualizo la tabla
-        mostrarProductosCarrito(idCliente);
+        let resultadoEliminarProductoCarrito = '';
+        try {
+            resultadoEliminarProductoCarrito = tienda.eliminarProductoCarrito(idCliente, codigoProducto);
+            //Se actualiza la tabla del carrito.
+            mostrarProductosCarrito(idCliente);
+        } catch (error) {
+            resultadoEliminarProductoCarrito = error.message;
+        }
+        return resultadoEliminarProductoCarrito;
     }
 
     //Asocia un evento al boton de mostrar el carrito de un cliente
-    btnMostrarCarritoCliente.addEventListener('click', function(event) {
+    btnMostrarCarritoCliente.addEventListener('click', function (event) {
         event.preventDefault();
-        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value; 
+        const identificacionCliente = document.getElementById('identificacion-cliente-carrito').value;
         mostrarProductosCarrito(identificacionCliente);
+        sweetAlert.mostrarPopupExito('Carrito del cliente mostrado exitosamente.');
     });
 
     //MANEJO DE LA VENTANA DE VENTA -----------------------------------------------------------------------
@@ -526,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
         //Crea la tabla
         const tabla = document.createElement('table');
         tabla.classList.add('tabla-ventas');
-        
+
         //Encabezado de la lista
         const encabezados = ["Código", "Fecha", "Total", "Cliente"];
         const encabezadosRow = document.createElement('tr');
@@ -569,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //Asociar un evento click a las filas de la tabla de ventas
-    tablaVentas.addEventListener('click', function(event) {
+    tablaVentas.addEventListener('click', function (event) {
         //Obtener la fila en la que se hizo click
         const filaVenta = event.target.closest('tr');
         if (!filaVenta) return;
@@ -582,21 +680,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         //Agregar la clase 'seleccionado' a la fila actual
         filaVenta.classList.add('seleccionado');
-        
+
         //Actualizo la venta seleccionada
         ventaSeleccionada = filaVenta.cells[0].textContent;
         console.log("Venta seleccionada " + ventaSeleccionada);
     });
 
     //Agregar un evento de click al boton de registrar venta
-    btnAgregarVenta.addEventListener('click', function(event) {
+    btnAgregarVenta.addEventListener('click', function (event) {
         event.preventDefault();
         const codigoVenta = document.getElementById('codigo-venta').value;
         const idClienteVenta = document.getElementById('cliente-venta').value;
         const fechaVenta = document.getElementById('fecha-venta').value;
-        registrarVenta(codigoVenta, idClienteVenta, fechaVenta);
+        let resultadoRegistroVenta = registrarVenta(codigoVenta, idClienteVenta, fechaVenta);
         //Limpia los campos del formulario
-        formVenta.reset();  
+        if(resultadoRegistroVenta === 'exito'){
+            sweetAlert.mostrarPopupExito('Venta registrada exitosamente.');
+            formVenta.reset();
+        } else {    
+            sweetAlert.mostrarPopupError('No se puedo realizar la venta: ' + resultadoRegistroVenta);
+        }
     });
 
     /**
@@ -606,20 +709,27 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} fechaVenta 
      */
     function registrarVenta(codigoVenta, idClienteVenta, fechaVenta) {
-        tienda.realizarVenta(codigoVenta, idClienteVenta, fechaVenta);
+        let resultado = tienda.realizarVenta(codigoVenta, idClienteVenta, fechaVenta);
         //Actualizo la tabla de ventas
         mostrarVentas();
+        return resultado;
     }
 
     //Agrega un evento de click al boton de eliminar venta
-    btnEliminarVenta.addEventListener('click', function() {
+    btnEliminarVenta.addEventListener('click', function () {
         if (!ventaSeleccionada) {
-            alert("Por favor seleccione una venta en la tabla.");
+            sweetAlert.mostartPopupPrecaucion('Por favor seleccione una venta de la tabla para poder eliminarla.');
             return;
         }
         const codigoVenta = ventaSeleccionada;
-        eliminarVenta(codigoVenta);
-        ventaSeleccionada = null;
+        let resultadoEliminacionVenta = eliminarVenta(codigoVenta);
+        if(resultadoEliminacionVenta === 'exito'){
+            sweetAlert.mostrarPopupExito('Venta eliminada exitosamente.');
+            ventaSeleccionada = null;
+        } else {
+            //No creo que llegue nunca aca el codigo ya que la venta tiene que ser seleccionada, pero, igual lo dejo por si acaso. - Daniel
+            sweetAlert.mostrarPopupError('No se pudo eliminar la venta: ' + resultadoEliminacionVenta);
+        }
     });
 
     /**
@@ -627,9 +737,10 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {*} codigoVenta 
      */
     function eliminarVenta(codigoVenta) {
-        tienda.eliminarVenta(codigoVenta);
+        let resultado = tienda.eliminarVenta(codigoVenta);
         //Actualizo la tabla
         mostrarVentas();
+        return resultado;
     }
 
     //MANEJO DE INVENTARIO ----------------------------------------------------------------------------
