@@ -898,6 +898,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         //Add detalles a la tabla
         listaDetalles.forEach(detalle => {
+            console.log(detalle);
             const fila = document.createElement('tr');
             fila.classList.add('fila-detalle');
 
@@ -911,6 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const cantidadCell = document.createElement('td');
             cantidadCell.textContent = detalle.cantidad.cantidad;
+            console.log(detalle.cantidad);
             fila.appendChild(cantidadCell);
 
             const subtotalCell = document.createElement('td');
