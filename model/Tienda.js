@@ -32,7 +32,7 @@ export default class Tienda {
         this.historialVentas = new LinkedList();
 
         //Deserializar los datos al iniciar la tienda
-        this.deserializarClientes(localStorage.getItem('clientes')); 
+        this.deserializarClientes(localStorage.getItem('clientes'));
         this.deserializarProductos(localStorage.getItem('productos'));
         this.deserializarVentas(localStorage.getItem('ventas'));
         this.deserializarHistorialVentas(localStorage.getItem('historial'));
@@ -559,8 +559,8 @@ export default class Tienda {
         const ventaEliminada = this.listaVentas[ventaIndex]
         // Restablecer la cantidad de productos en el inventario
         ventaEliminada.listaDetalles.forEach(detalle => {
-            const producto = this.hashMapProductos.get(detalle.producto);
-            producto.cantidad += detalle.cantidad;
+            const producto = this.hashMapProductos.get(detalle.producto.codigo);
+            producto.cantidad += detalle.cantidad.cantidad;
         });
         // Eliminar la venta de la lista de ventas
         this.listaVentas.splice(ventaIndex, 1);
