@@ -159,6 +159,9 @@ export default class Tienda {
                 const cliente = new Cliente(identificacion, nombre, direccion);
                 this.hashMapClientes.set(identificacion, cliente);
                 this.imprimirClientes();
+                //Serializo los clientes
+                const clientesSerializados = this.serializarClientes();
+                localStorage.setItem('clientes', clientesSerializados);
             }
             return 'exito';
         } catch (error) {
@@ -178,6 +181,9 @@ export default class Tienda {
             this.hashMapClientes.delete(idCliente);
             this.imprimirClientes();
             return 'exito'
+            //Serializo los clientes
+            const clientesSerializados = this.serializarClientes();
+            localStorage.setItem('clientes', clientesSerializados);
         } else {
             throw new Excepciones.EstadoCliente(`El cliente con identificación ${idCliente} no existe.`);
         }
@@ -190,7 +196,6 @@ export default class Tienda {
      * @param {*} nuevaDireccion 
      */
     actualizarCliente(identificacion, nuevoNombre, nuevaDireccion) {
-
         try {
             if (this.isCamposValidosActualizacionCliente(nuevoNombre, nuevaDireccion)) {
                 if (this.hashMapClientes.has(identificacion)) {
@@ -199,6 +204,9 @@ export default class Tienda {
                     cliente.setDireccion(nuevaDireccion);
                 }
                 return 'exito';
+                //Serializo los clientes
+                const clientesSerializados = this.serializarClientes();
+                localStorage.setItem('clientes', clientesSerializados);
             }
         } catch (error) {
             logError(error.message);
@@ -296,6 +304,8 @@ export default class Tienda {
             this.hashMapProductos.delete(codigoProducto);
             this.imprimirProductos();
             return 'exito';
+            const productiosSerializados = this.serializarProductos();
+            localStorage.setItem('productos', productiosSerializados);
         } else {
             //alert(`Producto con código ${codigoProducto} no existe.`);
             throw new Excepciones.EstadoProducto(`Producto con código ${codigoProducto} no existe.`);
@@ -318,6 +328,9 @@ export default class Tienda {
                     producto.setNombre(nuevoNombre);
                     producto.setPrecio(nuevoPrecio);
                     producto.setCantidad(nuevaCantidad);
+                    //Serializo los productos
+                    const productiosSerializados = this.serializarProductos();
+                    localStorage.setItem('productos', productiosSerializados);
                 }
                 return 'exito';
             }
@@ -508,6 +521,16 @@ export default class Tienda {
                 }
                 cliente.vaciarCarrito();
 
+                //Serializo las ventas
+                const ventasSerializadas = this.serializarVentas();
+                localStorage.setItem('ventas', ventasSerializadas);
+                //Serializo los productos
+                const productiosSerializados = this.serializarProductos();
+                localStorage.setItem('productos', productiosSerializados)
+                //Serializo el historial
+                const historialSerializados = this.serializarHistorialVentas();
+                localStorage.setItem('historial', historialSerializados);
+
             }
             return 'exito';
         } catch (error) {
@@ -566,6 +589,16 @@ export default class Tienda {
         this.listaVentas.splice(ventaIndex, 1);
         // Eliminar la venta de la linkedList de historial de ventas
         this.historialVentas.deleteVenta(codigoVenta);
+
+        //Serializo las ventas
+        const ventasSerializadas = this.serializarVentas();
+        localStorage.setItem('ventas', ventasSerializadas);
+        //Serializo los productos
+        const productiosSerializados = this.serializarProductos();
+        localStorage.setItem('productos', productiosSerializados)
+        //Serializo el historial
+        const historialSerializados = this.serializarHistorialVentas();
+        localStorage.setItem('historial', historialSerializados);
 
         return 'exito';
     }
