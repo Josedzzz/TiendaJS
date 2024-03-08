@@ -180,10 +180,11 @@ export default class Tienda {
         if (this.hashMapClientes.has(idCliente)) {
             this.hashMapClientes.delete(idCliente);
             this.imprimirClientes();
-            return 'exito'
             //Serializo los clientes
             const clientesSerializados = this.serializarClientes();
             localStorage.setItem('clientes', clientesSerializados);
+
+            return 'exito'
         } else {
             throw new Excepciones.EstadoCliente(`El cliente con identificación ${idCliente} no existe.`);
         }
@@ -203,10 +204,10 @@ export default class Tienda {
                     cliente.setNombre(nuevoNombre);
                     cliente.setDireccion(nuevaDireccion);
                 }
-                return 'exito';
                 //Serializo los clientes
                 const clientesSerializados = this.serializarClientes();
                 localStorage.setItem('clientes', clientesSerializados);
+                return 'exito';
             }
         } catch (error) {
             logError(error.message);
@@ -284,10 +285,10 @@ export default class Tienda {
                 this.hashMapProductos.set(codigo, producto);
                 //Imprimir el hashMap de productos para verificar si se registro correctamente
                 this.imprimirProductos();
-                //Serializo los productos
-                const productiosSerializados = this.serializarProductos();
-                localStorage.setItem('productos', productiosSerializados);
             }
+            //Serializo los productos
+            const productiosSerializados = this.serializarProductos();
+            localStorage.setItem('productos', productiosSerializados);
             return 'exito';
         } catch (error) {
             logError(error.message);
@@ -303,9 +304,10 @@ export default class Tienda {
         if (this.hashMapProductos.has(codigoProducto)) {
             this.hashMapProductos.delete(codigoProducto);
             this.imprimirProductos();
-            return 'exito';
+            //Serializo los productos
             const productiosSerializados = this.serializarProductos();
             localStorage.setItem('productos', productiosSerializados);
+            return 'exito';
         } else {
             //alert(`Producto con código ${codigoProducto} no existe.`);
             throw new Excepciones.EstadoProducto(`Producto con código ${codigoProducto} no existe.`);
@@ -520,18 +522,17 @@ export default class Tienda {
                     console.log('producto.cantidad after:', producto.cantidad); // Log producto.cantidad after
                 }
                 cliente.vaciarCarrito();
-
-                //Serializo las ventas
-                const ventasSerializadas = this.serializarVentas();
-                localStorage.setItem('ventas', ventasSerializadas);
-                //Serializo los productos
-                const productiosSerializados = this.serializarProductos();
-                localStorage.setItem('productos', productiosSerializados)
-                //Serializo el historial
-                const historialSerializados = this.serializarHistorialVentas();
-                localStorage.setItem('historial', historialSerializados);
-
             }
+            //Serializo las ventas
+            const ventasSerializadas = this.serializarVentas();
+            localStorage.setItem('ventas', ventasSerializadas);
+            //Serializo los productos
+            const productiosSerializados = this.serializarProductos();
+            localStorage.setItem('productos', productiosSerializados)
+            //Serializo el historial
+            const historialSerializados = this.serializarHistorialVentas();
+            localStorage.setItem('historial', historialSerializados);
+
             return 'exito';
         } catch (error) {
             logError(error.message);
